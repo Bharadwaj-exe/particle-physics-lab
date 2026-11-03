@@ -9,6 +9,9 @@ particle-physics-lab/
 ├── benchmarks/bench.py         performance benchmark
 ├── configs/                    run configurations (JSON)
 ├── data/raw/                   downloaded CMS file + provenance JSON (never modified)
+├── references/                 digitised CMS reference curves (material budget, muon resolution) with provenance
+├── calibration/                material fit to the CMS X0(η) reference (no dimuon data used)
+├── audit/                      independent audit scripts and their evidence files
 ├── particlelab/
 │   ├── units.py                unit conventions (GeV, m, T; c = 1) and physical constants
 │   ├── provenance.py           RunConfig, environment and run records

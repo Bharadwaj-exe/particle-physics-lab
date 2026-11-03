@@ -1,5 +1,5 @@
 {
-  "path": "data\\raw\\Dimuon_DoubleMu.csv",
+  "path": "data/raw/Dimuon_DoubleMu.csv",
   "n_rows": 100000,
   "n_valid": 100000,
   "rejected": {
@@ -24,7 +24,7 @@
     "muon_mass_GeV": 0.1056583755
   },
   "file_check": {
-    "path": "data\\raw\\Dimuon_DoubleMu.csv",
+    "path": "data/raw/Dimuon_DoubleMu.csv",
     "size": 13935840,
     "adler32": "5b87a72a",
     "size_ok": true,

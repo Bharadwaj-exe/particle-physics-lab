@@ -1,5 +1,5 @@
 {
-  "created_utc": "2026-11-02T18:37:31+00:00",
+  "created_utc": "2026-11-03T03:21:15+00:00",
   "environment": {
     "particlelab": "0.2.0",
     "python": "3.11.8",
@@ -10,11 +10,15 @@
       "pandas": "3.0.5",
       "matplotlib": "3.10.8",
       "PySide6": "6.12.0",
-      "pyqtgraph": "0.14.0"
+      "pyqtgraph": "0.14.0",
+      "pyvista": "0.49.2",
+      "pyvistaqt": "0.13.2",
+      "vtk": "9.7.1"
     },
     "git": {
-      "commit": "041881dbb39d51591d891c9c7e101dd6081eb9f6",
-      "dirty": true
+      "commit": "6c1a98e3f7347276338be32e8106c61cbb030877",
+      "dirty": false,
+      "changed_files": []
     }
   },
   "config": {
@@ -43,7 +47,7 @@
         "half_length": 0.265,
         "sigma_rphi": 9.999999999999999e-06,
         "sigma_z": 1.9999999999999998e-05,
-        "x_over_X0": 0.02
+        "x_over_X0": 0.0227
       },
       {
         "name": "PXB2",
@@ -51,7 +55,7 @@
         "half_length": 0.265,
         "sigma_rphi": 9.999999999999999e-06,
         "sigma_z": 1.9999999999999998e-05,
-        "x_over_X0": 0.02
+        "x_over_X0": 0.0227
       },
       {
         "name": "PXB3",
@@ -59,7 +63,7 @@
         "half_length": 0.265,
         "sigma_rphi": 9.999999999999999e-06,
         "sigma_z": 1.9999999999999998e-05,
-        "x_over_X0": 0.02
+        "x_over_X0": 0.0227
       },
       {
         "name": "TIB1",
@@ -67,7 +71,7 @@
         "half_length": 0.7000000000000001,
         "sigma_rphi": 2.9999999999999997e-05,
         "sigma_z": 0.0005,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.0399
       },
       {
         "name": "TIB2",
@@ -75,7 +79,7 @@
         "half_length": 0.7000000000000001,
         "sigma_rphi": 2.9999999999999997e-05,
         "sigma_z": 0.0005,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.0399
       },
       {
         "name": "TIB3",
@@ -83,7 +87,7 @@
         "half_length": 0.7000000000000001,
         "sigma_rphi": 2.9999999999999997e-05,
         "sigma_z": null,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.0399
       },
       {
         "name": "TIB4",
@@ -91,7 +95,7 @@
         "half_length": 0.7000000000000001,
         "sigma_rphi": 2.9999999999999997e-05,
         "sigma_z": null,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.0399
       },
       {
         "name": "TOB1",
@@ -99,7 +103,7 @@
         "half_length": 1.18,
         "sigma_rphi": 4.4999999999999996e-05,
         "sigma_z": 0.0005,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.0244
       },
       {
         "name": "TOB2",
@@ -107,7 +111,7 @@
         "half_length": 1.18,
         "sigma_rphi": 4.4999999999999996e-05,
         "sigma_z": 0.0005,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.0244
       },
       {
         "name": "TOB3",
@@ -115,7 +119,7 @@
         "half_length": 1.18,
         "sigma_rphi": 4.4999999999999996e-05,
         "sigma_z": null,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.0244
       },
       {
         "name": "TOB4",
@@ -123,7 +127,7 @@
         "half_length": 1.18,
         "sigma_rphi": 4.4999999999999996e-05,
         "sigma_z": null,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.0244
       },
       {
         "name": "TOB5",
@@ -131,7 +135,7 @@
         "half_length": 1.18,
         "sigma_rphi": 4.4999999999999996e-05,
         "sigma_z": null,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.0244
       },
       {
         "name": "TOB6",
@@ -139,7 +143,7 @@
         "half_length": 1.18,
         "sigma_rphi": 4.4999999999999996e-05,
         "sigma_z": null,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.0244
       }
     ],
     "disks": [
@@ -150,7 +154,7 @@
         "r_max": 0.15,
         "sigma_rphi": 1.4999999999999999e-05,
         "sigma_r": 1.9999999999999998e-05,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.01
       },
       {
         "name": "FPIX2",
@@ -159,7 +163,7 @@
         "r_max": 0.15,
         "sigma_rphi": 1.4999999999999999e-05,
         "sigma_r": 1.9999999999999998e-05,
-        "x_over_X0": 0.03
+        "x_over_X0": 0.01
       },
       {
         "name": "TID1",
@@ -168,7 +172,7 @@
         "r_max": 0.5,
         "sigma_rphi": 3.5e-05,
         "sigma_r": 0.001,
-        "x_over_X0": 0.04
+        "x_over_X0": 0.0426
       },
       {
         "name": "TID2",
@@ -177,7 +181,7 @@
         "r_max": 0.5,
         "sigma_rphi": 3.5e-05,
         "sigma_r": 0.001,
-        "x_over_X0": 0.04
+        "x_over_X0": 0.0426
       },
       {
         "name": "TID3",
@@ -186,7 +190,7 @@
         "r_max": 0.5,
         "sigma_rphi": 3.5e-05,
         "sigma_r": 0.001,
-        "x_over_X0": 0.04
+        "x_over_X0": 0.0426
       },
       {
         "name": "TEC1",
@@ -195,7 +199,7 @@
         "r_max": 1.1300000000000001,
         "sigma_rphi": 3.9999999999999996e-05,
         "sigma_r": 0.001,
-        "x_over_X0": 0.05
+        "x_over_X0": 0.0519
       },
       {
         "name": "TEC2",
@@ -204,7 +208,7 @@
         "r_max": 1.1300000000000001,
         "sigma_rphi": 3.9999999999999996e-05,
         "sigma_r": null,
-        "x_over_X0": 0.05
+        "x_over_X0": 0.0519
       },
       {
         "name": "TEC3",
@@ -213,7 +217,7 @@
         "r_max": 1.1300000000000001,
         "sigma_rphi": 3.9999999999999996e-05,
         "sigma_r": 0.001,
-        "x_over_X0": 0.05
+        "x_over_X0": 0.0519
       },
       {
         "name": "TEC4",
@@ -222,7 +226,7 @@
         "r_max": 1.1300000000000001,
         "sigma_rphi": 3.9999999999999996e-05,
         "sigma_r": null,
-        "x_over_X0": 0.05
+        "x_over_X0": 0.0519
       },
       {
         "name": "TEC5",
@@ -231,7 +235,7 @@
         "r_max": 1.1300000000000001,
         "sigma_rphi": 3.9999999999999996e-05,
         "sigma_r": 0.001,
-        "x_over_X0": 0.05
+        "x_over_X0": 0.0519
       },
       {
         "name": "TEC6",
@@ -240,7 +244,7 @@
         "r_max": 1.1300000000000001,
         "sigma_rphi": 3.9999999999999996e-05,
         "sigma_r": null,
-        "x_over_X0": 0.05
+        "x_over_X0": 0.0519
       },
       {
         "name": "TEC7",
@@ -249,7 +253,7 @@
         "r_max": 1.1300000000000001,
         "sigma_rphi": 3.9999999999999996e-05,
         "sigma_r": 0.001,
-        "x_over_X0": 0.05
+        "x_over_X0": 0.0519
       },
       {
         "name": "TEC8",
@@ -258,7 +262,7 @@
         "r_max": 1.1300000000000001,
         "sigma_rphi": 3.9999999999999996e-05,
         "sigma_r": null,
-        "x_over_X0": 0.05
+        "x_over_X0": 0.0519
       },
       {
         "name": "TEC9",
@@ -267,7 +271,7 @@
         "r_max": 1.1300000000000001,
         "sigma_rphi": 3.9999999999999996e-05,
         "sigma_r": 0.001,
-        "x_over_X0": 0.05
+        "x_over_X0": 0.0519
       }
     ],
     "hit_efficiency": 0.99,
@@ -277,7 +281,86 @@
     "beamspot_constraint": 1.9999999999999998e-05,
     "min_hits": 8,
     "eta_max": 2.4,
-    "pt_min": 3.0
+    "pt_min": 3.0,
+    "passive": [
+      {
+        "name": "BP beam pipe",
+        "radius": 0.028999999999999998,
+        "z_min": 0.0,
+        "z_max": 3.0,
+        "x_over_X0": 0.0022675736961451248
+      },
+      {
+        "name": "PIX flange inner",
+        "z": 0.28,
+        "r_min": 0.04,
+        "r_max": 0.12,
+        "x_over_X0": 0.1621
+      },
+      {
+        "name": "PIX flange outer",
+        "z": 0.28,
+        "r_min": 0.12,
+        "r_max": 0.22,
+        "x_over_X0": 0.049
+      },
+      {
+        "name": "PIX service cylinder",
+        "radius": 0.18,
+        "z_min": 0.5,
+        "z_max": 2.8,
+        "x_over_X0": 0.0398
+      },
+      {
+        "name": "TIB end services",
+        "z": 0.72,
+        "r_min": 0.22,
+        "r_max": 0.52,
+        "x_over_X0": 0.2188
+      },
+      {
+        "name": "TIB services, inner segment",
+        "radius": 0.53,
+        "z_min": 0.12,
+        "z_max": 0.6,
+        "x_over_X0": 0.0345
+      },
+      {
+        "name": "TIB services, outer segment",
+        "radius": 0.53,
+        "z_min": 0.6,
+        "z_max": 1.1,
+        "x_over_X0": 0.1915
+      },
+      {
+        "name": "TID back services",
+        "z": 1.1,
+        "r_min": 0.2,
+        "r_max": 0.52,
+        "x_over_X0": 0.0458
+      },
+      {
+        "name": "TOB services, inner segment",
+        "radius": 0.85,
+        "z_min": 0.2,
+        "z_max": 0.7000000000000001,
+        "x_over_X0": 0.1062
+      },
+      {
+        "name": "TOB services, outer segment",
+        "radius": 0.85,
+        "z_min": 0.7000000000000001,
+        "z_max": 1.18,
+        "x_over_X0": 0.171
+      },
+      {
+        "name": "TOB end flange",
+        "z": 1.2,
+        "r_min": 0.55,
+        "r_max": 1.12,
+        "x_over_X0": 0.0305
+      }
+    ]
   },
   "particle_data": {
     "source": "Particle Data Group, Review of Particle Physics, PDG Live, 2026 edition (Int. J. Mod. Phys. A 41, 2630011 (2026))",
@@ -297,7 +380,7 @@
       "producer_selection": "two muons |eta|<2.4, >=1 global, opposite charge, 0.3<M<300 GeV"
     },
     "file_check": {
-      "path": "data\\raw\\Dimuon_DoubleMu.csv",
+      "path": "data/raw/Dimuon_DoubleMu.csv",
       "size": 13935840,
       "adler32": "5b87a72a",
       "size_ok": true,
@@ -342,157 +425,470 @@
         "pdg_mass": 3.0969,
         "data_mass": 3.0933108182716285,
         "data_mass_err": 0.00048001957732644526,
-        "sim_mass": 3.09733942980455,
-        "sim_mass_err": 0.0001978506007145985,
+        "sim_mass": 3.098074605903294,
+        "sim_mass_err": 0.00029893719661786846,
         "data_minus_pdg_MeV": -3.5891817283717486,
-        "sim_minus_pdg_MeV": 0.43942980454980685,
+        "sim_minus_pdg_MeV": 1.1746059032939904,
         "data_fwhm_MeV": 62.01643722437744,
-        "sim_fwhm_MeV": 45.76123617618455,
-        "fwhm_ratio_sim_over_data": 0.7378888279347449,
+        "sim_fwhm_MeV": 66.06282792052065,
+        "fwhm_ratio_sim_over_data": 1.0652470679910753,
         "data_resolution_param_MeV": 26.336180237972414,
-        "sim_resolution_param_MeV": 19.433173168075655,
+        "sim_resolution_param_MeV": 28.054538780584615,
         "data_signal": 6359.817153753564,
         "data_signal_err": 106.1812914788557,
         "data_background": 1029.1385490254559,
         "data_fit_pvalue": 0.23857988828962295,
-        "sim_fit_pvalue": 0.9983486256227313,
+        "sim_fit_pvalue": 0.5272624260811337,
         "data_signal_model": "cb_gauss",
         "sim_signal_model": "double_gauss",
         "kinematics_chi2": {
           "muon pT [GeV]": [
-            12397.138201162878,
+            12234.501232870009,
             26
           ],
           "muon eta": [
-            1538.7140570106208,
+            1503.6101111167545,
             23
           ]
         },
         "sim_cutflow": {
           "generated": 1000000,
-          "both tracks reconstructable": 556110,
-          "both fits ok": 556110,
-          "opposite charge": 556110,
-          "both pass pT and |eta| cuts": 12184
+          "both tracks reconstructable": 556098,
+          "both fits ok": 556098,
+          "opposite charge": 556098,
+          "both pass pT and |eta| cuts": 12168
         },
-        "sim_acceptance": 0.012184,
+        "sim_acceptance": 0.012168,
         "sim_seed": 20261102,
         "sim_events_generated": 1000000,
-        "sim_mean_reco_minus_true_MeV": 0.5905401254611164,
-        "sim_mean_reco_minus_true_err_MeV": 0.20321523888435652
+        "sim_mean_reco_minus_true_MeV": 1.443422017512057,
+        "sim_mean_reco_minus_true_err_MeV": 0.3130246832629822,
+        "data_mass_syst_MeV": 0.2782641708288457,
+        "data_mass_systematics": {
+          "process": "J/psi",
+          "nominal_mass": 3.0933108182716285,
+          "stat_err_MeV": 0.4800195773264453,
+          "syst_by_category_MeV": {
+            "window": 0.008690581360326632,
+            "binning": 0.18154643382883862,
+            "model": 0.21070433058367755
+          },
+          "syst_total_MeV": 0.2782641708288457,
+          "variations": [
+            {
+              "category": "window",
+              "label": "window 2.95–3.25 GeV",
+              "mass": 3.0933045205050282,
+              "mass_err": 0.00047960837321137995,
+              "pvalue": 0.11356756475318891,
+              "converged": true,
+              "shift_MeV": -0.0062977666002161925,
+              "accepted": true,
+              "note": ""
+            },
+            {
+              "category": "window",
+              "label": "window 2.85–3.35 GeV",
+              "mass": 3.093319508852989,
+              "mass_err": 0.0004807438496188904,
+              "pvalue": 0.32619297155750593,
+              "converged": false,
+              "shift_MeV": 0.008690581360326632,
+              "accepted": true,
+              "note": "Hessian not positive definite (mass used, its error not)"
+            },
+            {
+              "category": "binning",
+              "label": "40 bins",
+              "mass": 3.0933951473063477,
+              "mass_err": 0.0005654991443939468,
+              "pvalue": 0.8947934119121926,
+              "converged": true,
+              "shift_MeV": 0.0843290347192216,
+              "accepted": true,
+              "note": ""
+            },
+            {
+              "category": "binning",
+              "label": "160 bins",
+              "mass": 3.0931292718377996,
+              "mass_err": 0.0004882691235665472,
+              "pvalue": 0.19935956596810253,
+              "converged": false,
+              "shift_MeV": -0.18154643382883862,
+              "accepted": true,
+              "note": "Hessian not positive definite (mass used, its error not)"
+            },
+            {
+              "category": "model",
+              "label": "signal double_gauss",
+              "mass": 3.093100113941045,
+              "mass_err": 0.0004265057477968408,
+              "pvalue": 0.2652300859554392,
+              "converged": true,
+              "shift_MeV": -0.21070433058367755,
+              "accepted": true,
+              "note": ""
+            },
+            {
+              "category": "model",
+              "label": "signal crystal_ball",
+              "mass": 3.093944827108305,
+              "mass_err": 0.00048454228006260264,
+              "pvalue": 0.00018276327400577088,
+              "converged": true,
+              "shift_MeV": 0.6340088366765251,
+              "accepted": false,
+              "note": "rejected: p = 1.8e-04 < 0.01"
+            }
+          ]
+        },
+        "data_mass_by_region": {
+          "both central (|η| < 0.9)": {
+            "n_events_window": 3390,
+            "mass": 3.0941311579398443,
+            "mass_err": 0.000522319987744952,
+            "offset_from_pdg_pct": -0.08940689270418023,
+            "pvalue": 0.02223459514614438,
+            "converged": false,
+            "optimizer_ok": true,
+            "hessian_ok": false
+          },
+          "one central": {
+            "n_events_window": 1078,
+            "mass": 3.093492838815664,
+            "mass_err": 0.001087231784708092,
+            "offset_from_pdg_pct": -0.1100184437449192,
+            "pvalue": 0.025846136721755977,
+            "converged": false,
+            "optimizer_ok": true,
+            "hessian_ok": false
+          },
+          "both forward (|η| > 0.9)": {
+            "n_events_window": 2921,
+            "mass": 3.0916643848605445,
+            "mass_err": 0.0009258097341871738,
+            "offset_from_pdg_pct": -0.16905987082100893,
+            "pvalue": 0.10507696884416579,
+            "converged": false,
+            "optimizer_ok": true,
+            "hessian_ok": false
+          }
+        }
       },
       "Upsilon(1S)": {
         "process": "Upsilon(1S)",
         "pdg_mass": 9.4604,
         "data_mass": 9.44390434179264,
         "data_mass_err": 0.0030858390254586785,
-        "sim_mass": 9.46150388413484,
-        "sim_mass_err": 0.00026612029453384426,
+        "sim_mass": 9.462425885708619,
+        "sim_mass_err": 0.0004060428530851821,
         "data_minus_pdg_MeV": -16.495658207359654,
-        "sim_minus_pdg_MeV": 1.103884134840527,
+        "sim_minus_pdg_MeV": 2.0258857086190574,
         "data_fwhm_MeV": 214.19587106775495,
-        "sim_fwhm_MeV": 141.72222684715052,
-        "fwhm_ratio_sim_over_data": 0.6616477999350445,
+        "sim_fwhm_MeV": 204.50452595513724,
+        "fwhm_ratio_sim_over_data": 0.9547547529076686,
         "data_resolution_param_MeV": 90.96138570908568,
-        "sim_resolution_param_MeV": 60.18440073345954,
+        "sim_resolution_param_MeV": 86.84581533681725,
         "data_signal": 3111.438628162688,
         "data_signal_err": 200.0750843734276,
         "data_background": 9913.706365599372,
         "data_fit_pvalue": 0.23304133838491622,
-        "sim_fit_pvalue": 0.004248329570543023,
+        "sim_fit_pvalue": 0.0020302072970327027,
         "data_signal_model": "double_gauss",
         "sim_signal_model": "double_gauss",
         "kinematics_chi2": {
           "muon pT [GeV]": [
-            782.0268544168252,
+            779.6797264329203,
             25
           ],
           "muon eta": [
-            160.35247485917455,
+            164.51893994692733,
             23
           ]
         },
         "sim_cutflow": {
           "generated": 200000,
-          "both tracks reconstructable": 109026,
-          "both fits ok": 109026,
-          "opposite charge": 109026,
-          "both pass pT and |eta| cuts": 60637
+          "both tracks reconstructable": 109081,
+          "both fits ok": 109081,
+          "opposite charge": 109081,
+          "both pass pT and |eta| cuts": 60659
         },
-        "sim_acceptance": 0.303185,
+        "sim_acceptance": 0.303295,
         "sim_seed": 20261103,
         "sim_events_generated": 200000,
-        "sim_mean_reco_minus_true_MeV": 1.3615861718343394,
-        "sim_mean_reco_minus_true_err_MeV": 0.27211093702203143
+        "sim_mean_reco_minus_true_MeV": 3.119171334909214,
+        "sim_mean_reco_minus_true_err_MeV": 0.419440134096473,
+        "data_mass_syst_MeV": 1.0896165403759817,
+        "data_mass_systematics": {
+          "process": "Upsilon(1S)",
+          "nominal_mass": 9.44390434179264,
+          "stat_err_MeV": 3.0858390254586787,
+          "syst_by_category_MeV": {
+            "window": 0.20746438900154374,
+            "binning": 0.7102108942973473,
+            "model": 0.7998895036056552
+          },
+          "syst_total_MeV": 1.0896165403759817,
+          "variations": [
+            {
+              "category": "window",
+              "label": "window 8.7–11.2 GeV",
+              "mass": 9.443696877403639,
+              "mass_err": 0.0031051427828844074,
+              "pvalue": 0.23601807217532547,
+              "converged": true,
+              "shift_MeV": -0.20746438900154374,
+              "accepted": true,
+              "note": ""
+            },
+            {
+              "category": "window",
+              "label": "window 8.4–11.8 GeV",
+              "mass": 9.443904426754845,
+              "mass_err": 0.0031035619037513237,
+              "pvalue": 0.011971256003361633,
+              "converged": true,
+              "shift_MeV": 8.496220438303226e-05,
+              "accepted": true,
+              "note": ""
+            },
+            {
+              "category": "binning",
+              "label": "60 bins",
+              "mass": 9.444387745543809,
+              "mass_err": 0.0031396131172784216,
+              "pvalue": 0.05565370141132154,
+              "converged": true,
+              "shift_MeV": 0.48340375116850964,
+              "accepted": true,
+              "note": ""
+            },
+            {
+              "category": "binning",
+              "label": "240 bins",
+              "mass": 9.444614552686938,
+              "mass_err": 0.0030656644303157675,
+              "pvalue": 0.2322237520249094,
+              "converged": true,
+              "shift_MeV": 0.7102108942973473,
+              "accepted": true,
+              "note": ""
+            },
+            {
+              "category": "model",
+              "label": "signal cb_gauss",
+              "mass": 9.444704231296246,
+              "mass_err": 0.0031740636465111363,
+              "pvalue": 0.2155264876413642,
+              "converged": true,
+              "shift_MeV": 0.7998895036056552,
+              "accepted": true,
+              "note": ""
+            }
+          ]
+        },
+        "data_mass_by_region": {
+          "both central (|η| < 0.9)": {
+            "n_events_window": 4951,
+            "mass": 9.445116250236726,
+            "mass_err": 0.0033470755048098186,
+            "offset_from_pdg_pct": -0.1615550057426085,
+            "pvalue": 0.6611270310339405,
+            "converged": true,
+            "optimizer_ok": true,
+            "hessian_ok": true
+          },
+          "one central": {
+            "n_events_window": 5323,
+            "mass": 9.457500209972705,
+            "mass_err": 0.00033494504246058535,
+            "offset_from_pdg_pct": -0.03065187547349746,
+            "pvalue": 7.853708662656681e-75,
+            "converged": false,
+            "optimizer_ok": true,
+            "hessian_ok": false
+          },
+          "both forward (|η| > 0.9)": {
+            "n_events_window": 4941,
+            "mass": 9.432029002005283,
+            "mass_err": 0.007143458582998723,
+            "offset_from_pdg_pct": -0.2998921609521421,
+            "pvalue": 0.09245528025144062,
+            "converged": true,
+            "optimizer_ok": true,
+            "hessian_ok": true
+          }
+        }
       },
       "Z": {
         "process": "Z",
         "pdg_mass": 91.1879,
-        "data_mass": 90.94801431357496,
-        "data_mass_err": 0.03851542681188677,
-        "sim_mass": 91.18958708211501,
-        "sim_mass_err": 0.009137090909162373,
-        "data_minus_pdg_MeV": -239.8856864250405,
-        "sim_minus_pdg_MeV": 1.6870821150121174,
-        "data_fwhm_MeV": 4437.956734052065,
-        "sim_fwhm_MeV": 3523.4398161993286,
-        "fwhm_ratio_sim_over_data": 0.7939328901438524,
-        "data_resolution_param_MeV": 1106.9767816285942,
-        "sim_resolution_param_MeV": 787.8192495529524,
-        "data_signal": 5320.622218779376,
-        "data_signal_err": 82.18814786407674,
-        "data_background": 393.3607291632954,
-        "data_fit_pvalue": 0.3612111075458352,
-        "sim_fit_pvalue": 0.9607533584729394,
+        "data_mass": 90.91453150268755,
+        "data_mass_err": 0.07565832230181452,
+        "sim_mass": 91.19294633338941,
+        "sim_mass_err": 0.010154379935766946,
+        "data_minus_pdg_MeV": -273.36849731244683,
+        "sim_minus_pdg_MeV": 5.046333389415736,
+        "data_fwhm_MeV": 4380.607252069751,
+        "sim_fwhm_MeV": 4097.531927077711,
+        "fwhm_ratio_sim_over_data": 0.9353798894301029,
+        "data_resolution_param_MeV": 1116.1200834215572,
+        "sim_resolution_param_MeV": 1064.6544951149529,
+        "data_signal": 5550.040602302329,
+        "data_signal_err": 165.12272120544196,
+        "data_background": 165.935219301814,
+        "data_fit_pvalue": 0.6296356144491776,
+        "sim_fit_pvalue": 0.04424096315515055,
         "data_signal_model": "rbw_cb",
         "sim_signal_model": "rbw_gauss",
         "kinematics_chi2": {
           "muon pT [GeV]": [
-            681.7762430243383,
+            675.3749101277589,
             26
           ],
           "muon eta": [
-            392.1892444510507,
+            400.86997324133097,
             23
           ]
         },
         "sim_cutflow": {
           "generated": 100000,
-          "both tracks reconstructable": 65692,
-          "both fits ok": 65692,
-          "opposite charge": 65692,
-          "both pass pT and |eta| cuts": 56948
+          "both tracks reconstructable": 65687,
+          "both fits ok": 65687,
+          "opposite charge": 65687,
+          "both pass pT and |eta| cuts": 56954
         },
-        "sim_acceptance": 0.56948,
+        "sim_acceptance": 0.56954,
         "sim_seed": 20261104,
         "sim_events_generated": 100000,
-        "sim_mean_reco_minus_true_MeV": 13.445834087201735,
-        "sim_mean_reco_minus_true_err_MeV": 3.5418484375978485
+        "sim_mean_reco_minus_true_MeV": 15.202407701208303,
+        "sim_mean_reco_minus_true_err_MeV": 4.761581820924252,
+        "data_mass_syst_MeV": 30.23778832779469,
+        "data_mass_systematics": {
+          "process": "Z",
+          "nominal_mass": 90.91453150268755,
+          "stat_err_MeV": 75.65832230181452,
+          "syst_by_category_MeV": {
+            "window": 28.13221284581857,
+            "binning": 11.086137440699417
+          },
+          "syst_total_MeV": 30.23778832779469,
+          "variations": [
+            {
+              "category": "window",
+              "label": "window 75–105 GeV",
+              "mass": 90.90982169458707,
+              "mass_err": 0.05883353746686079,
+              "pvalue": 0.7593501534451612,
+              "converged": false,
+              "shift_MeV": -4.709808100486157,
+              "accepted": true,
+              "note": "Hessian not positive definite (mass used, its error not)"
+            },
+            {
+              "category": "window",
+              "label": "window 80–100 GeV",
+              "mass": 90.88639928984173,
+              "mass_err": 0.09706904550548932,
+              "pvalue": 0.6408200512243158,
+              "converged": true,
+              "shift_MeV": -28.13221284581857,
+              "accepted": true,
+              "note": ""
+            },
+            {
+              "category": "binning",
+              "label": "40 bins",
+              "mass": 90.92561764012825,
+              "mass_err": 0.08004236053370362,
+              "pvalue": 0.15802217732509477,
+              "converged": true,
+              "shift_MeV": 11.086137440699417,
+              "accepted": true,
+              "note": ""
+            },
+            {
+              "category": "binning",
+              "label": "160 bins",
+              "mass": 90.91112617268512,
+              "mass_err": 0.0787811747376122,
+              "pvalue": 0.43062514442141403,
+              "converged": true,
+              "shift_MeV": -3.4053300024368127,
+              "accepted": true,
+              "note": ""
+            },
+            {
+              "category": "model",
+              "label": "signal rbw_gauss",
+              "mass": 90.69625506197545,
+              "mass_err": 0.03895106514951838,
+              "pvalue": 5.635444349334718e-09,
+              "converged": true,
+              "shift_MeV": -218.27644071210273,
+              "accepted": false,
+              "note": "rejected: p = 5.6e-09 < 0.01"
+            }
+          ]
+        },
+        "data_mass_by_region": {
+          "both central (|η| < 0.9)": {
+            "n_events_window": 1305,
+            "mass": 90.97947961159542,
+            "mass_err": 0.1337415616851408,
+            "offset_from_pdg_pct": -0.228561452127507,
+            "pvalue": 0.28615131602443294,
+            "converged": false,
+            "optimizer_ok": true,
+            "hessian_ok": false
+          },
+          "one central": {
+            "n_events_window": 2786,
+            "mass": 90.96195338906232,
+            "mass_err": 0.1130844816586413,
+            "offset_from_pdg_pct": -0.24778135140482993,
+            "pvalue": 0.9193449222673005,
+            "converged": true,
+            "optimizer_ok": true,
+            "hessian_ok": true
+          },
+          "both forward (|η| > 0.9)": {
+            "n_events_window": 1625,
+            "mass": 90.83404772714776,
+            "mass_err": 0.1135337442646139,
+            "offset_from_pdg_pct": -0.388047397573843,
+            "pvalue": 0.4492187551219723,
+            "converged": true,
+            "optimizer_ok": true,
+            "hessian_ok": true
+          }
+        }
       }
     },
     "fit_validation": {
       "J/psi": {
         "n_toys": 100,
         "failed": 0,
-        "pull_mean": -0.04282992855302102,
-        "pull_mean_err": 0.09455692017013671,
-        "pull_width": 0.9455692017013672
+        "pull_mean": -0.1461720060433702,
+        "pull_mean_err": 0.09772078983137676,
+        "pull_width": 0.9772078983137676
       },
       "Upsilon(1S)": {
         "n_toys": 100,
         "failed": 0,
-        "pull_mean": -0.041463979168196274,
-        "pull_mean_err": 0.093425120891996,
-        "pull_width": 0.93425120891996
+        "pull_mean": -0.10874270024727889,
+        "pull_mean_err": 0.10942439005293532,
+        "pull_width": 1.0942439005293532
       },
       "Z": {
-        "n_toys": 98,
-        "failed": 2,
-        "pull_mean": 0.14469621328616813,
-        "pull_mean_err": 0.09373666026041386,
-        "pull_width": 0.9279455936228549
+        "n_toys": 100,
+        "failed": 0,
+        "pull_mean": -0.011763356810487076,
+        "pull_mean_err": 0.10000481317078418,
+        "pull_width": 1.0000481317078418
       }
     }
   },
-  "runtime_s": 392.9756827354431
+  "runtime_s": 722.3988852500916
 }

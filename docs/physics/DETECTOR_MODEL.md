@@ -120,4 +120,4 @@ These values come from the CMS simulation, not from data. The full model curves 
 
 ## Momentum-scale bias from the resolution
 
-Because pT ∝ 1/κ and the curvature κ is measured with a symmetric error, the mean reconstructed pT is biased upwards by about (σ_κ/κ)². With σ(pT)/pT ≈ 1.5–2 %, this is a few × 10⁻⁴. The simulated Υ(1S) peak, for example, sits about 5 MeV above its generated mass. Real experiments remove this with a momentum-scale calibration; the model does not, and the effect is reported in `outputs/results.json` (`sim_mean_reco_minus_true_MeV`).
+Because pT ∝ 1/κ and the curvature κ is measured with a symmetric error, the mean reconstructed pT is biased upwards by about (σ_κ/κ)². With σ(pT)/pT ≈ 1.5–2 %, this is a few × 10⁻⁴. The mean reconstructed Υ(1S) mass, for example, is 3.1 ± 0.4 MeV above the generated one. Real experiments remove this with a momentum-scale calibration; the model does not, and the effect is reported in `outputs/results.json` (`sim_mean_reco_minus_true_MeV`).

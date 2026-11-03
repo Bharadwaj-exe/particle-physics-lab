@@ -1,6 +1,6 @@
 # Audit Action Items
 
-These come from `FINAL_INDEPENDENT_AUDIT.md` (baseline commit `440ef55`). None has been implemented. The list is ordered by priority.
+These come from `FINAL_INDEPENDENT_AUDIT.md` (baseline commit `440ef55`). The list is ordered by priority. **Status after the follow-up:** A1, A2, A3, A4, A5, A10 (docs), A12 and A16 are done, and A6 and A13 are partly done. See the addendum at the end of the audit report.
 
 - **Priority:** P1 = fix before presenting quantitative results; P2 = fix in the next development phase; P3 = optional or housekeeping.
 - **Effort:** S = under 2 hours, M = half a day to a day, L = several days.

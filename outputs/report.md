@@ -24,26 +24,66 @@ Warnings (rows kept):
 
 | | PDG M (GeV) | data M (GeV) | sim M (GeV) | data FWHM (MeV) | sim FWHM (MeV) | sim/data FWHM | data signal | data fit p |
 |---|---|---|---|---|---|---|---|---|
-| J/psi | 3.0969 | 3.0933 ± 0.0005 | 3.0973 ± 0.0002 | 62 | 46 | 0.74 | 6360 ± 106 | 0.24 |
-| Upsilon(1S) | 9.4604 | 9.4439 ± 0.0031 | 9.4615 ± 0.0003 | 214 | 142 | 0.66 | 3111 ± 200 | 0.23 |
-| Z | 91.1879 | 90.9480 ± 0.0385 | 91.1896 ± 0.0091 | 4438 | 3523 | 0.79 | 5321 ± 82 | 0.36 |
+| J/psi | 3.0969 | 3.0933 ± 0.0005 (stat) ± 0.0003 (syst) | 3.0981 ± 0.0003 | 62 | 66 | 1.07 | 6360 ± 106 | 0.24 |
+| Upsilon(1S) | 9.4604 | 9.4439 ± 0.0031 (stat) ± 0.0011 (syst) | 9.4624 ± 0.0004 | 214 | 205 | 0.95 | 3111 ± 200 | 0.23 |
+| Z | 91.1879 | 90.9145 ± 0.0757 (stat) ± 0.0302 (syst) | 91.1929 ± 0.0102 | 4381 | 4098 | 0.94 | 5550 ± 165 | 0.63 |
+
+## Systematic uncertainty of the data masses
+
+Each row refits the data with one fit choice changed. A variation counts only if the minimiser converged and p > 0.01; the largest accepted shift per category is used, and categories are added in quadrature.
+
+| | variation | shift (MeV) | p | used |
+|---|---|---|---|---|
+| J/psi | window 2.95–3.25 GeV | -0.01 | 0.114 | yes |
+| J/psi | window 2.85–3.35 GeV | +0.01 | 0.326 | yes — Hessian not positive definite (mass used, its error not) |
+| J/psi | 40 bins | +0.08 | 0.895 | yes |
+| J/psi | 160 bins | -0.18 | 0.199 | yes — Hessian not positive definite (mass used, its error not) |
+| J/psi | signal double_gauss | -0.21 | 0.265 | yes |
+| J/psi | signal crystal_ball | +0.63 | 0.000183 | no — rejected: p = 1.8e-04 < 0.01 |
+| J/psi | **total** (window 0.01, binning 0.18, model 0.21) | ±0.28 | | stat ±0.48 |
+| Upsilon(1S) | window 8.7–11.2 GeV | -0.21 | 0.236 | yes |
+| Upsilon(1S) | window 8.4–11.8 GeV | +0.00 | 0.012 | yes |
+| Upsilon(1S) | 60 bins | +0.48 | 0.0557 | yes |
+| Upsilon(1S) | 240 bins | +0.71 | 0.232 | yes |
+| Upsilon(1S) | signal cb_gauss | +0.80 | 0.216 | yes |
+| Upsilon(1S) | **total** (window 0.21, binning 0.71, model 0.80) | ±1.09 | | stat ±3.09 |
+| Z | window 75–105 GeV | -4.71 | 0.759 | yes — Hessian not positive definite (mass used, its error not) |
+| Z | window 80–100 GeV | -28.13 | 0.641 | yes |
+| Z | 40 bins | +11.09 | 0.158 | yes |
+| Z | 160 bins | -3.41 | 0.431 | yes |
+| Z | signal rbw_gauss | -218.28 | 5.64e-09 | no — rejected: p = 5.6e-09 < 0.01 |
+| Z | **total** (window 28.13, binning 11.09) | ±30.24 | | stat ±75.66 |
+
+## Data masses by detector region (statistical errors only)
+
+| | region | events in window | M (GeV) | offset from PDG | fit p | error matrix OK |
+|---|---|---|---|---|---|---|
+| J/psi | both central (|η| < 0.9) | 3390 | 3.0941 ± 0.0005 | -0.089 % | 0.0222 | no |
+| J/psi | one central | 1078 | 3.0935 ± 0.0011 | -0.110 % | 0.0258 | no |
+| J/psi | both forward (|η| > 0.9) | 2921 | 3.0917 ± 0.0009 | -0.169 % | 0.105 | no |
+| Upsilon(1S) | both central (|η| < 0.9) | 4951 | 9.4451 ± 0.0033 | -0.162 % | 0.661 | yes |
+| Upsilon(1S) | one central | 5323 | 9.4575 ± 0.0003 | -0.031 % | 7.85e-75 | no |
+| Upsilon(1S) | both forward (|η| > 0.9) | 4941 | 9.4320 ± 0.0071 | -0.300 % | 0.0925 | yes |
+| Z | both central (|η| < 0.9) | 1305 | 90.9795 ± 0.1337 | -0.229 % | 0.286 | no |
+| Z | one central | 2786 | 90.9620 ± 0.1131 | -0.248 % | 0.919 | yes |
+| Z | both forward (|η| > 0.9) | 1625 | 90.8340 ± 0.1135 | -0.388 % | 0.449 | yes |
 
 ## Simulation cut flow
 
-- J/psi: generated: 1000000, both tracks reconstructable: 556110, both fits ok: 556110, opposite charge: 556110, both pass pT and |eta| cuts: 12184
-- Upsilon(1S): generated: 200000, both tracks reconstructable: 109026, both fits ok: 109026, opposite charge: 109026, both pass pT and |eta| cuts: 60637
-- Z: generated: 100000, both tracks reconstructable: 65692, both fits ok: 65692, opposite charge: 65692, both pass pT and |eta| cuts: 56948
+- J/psi: generated: 1000000, both tracks reconstructable: 556098, both fits ok: 556098, opposite charge: 556098, both pass pT and |eta| cuts: 12168
+- Upsilon(1S): generated: 200000, both tracks reconstructable: 109081, both fits ok: 109081, opposite charge: 109081, both pass pT and |eta| cuts: 60659
+- Z: generated: 100000, both tracks reconstructable: 65687, both fits ok: 65687, opposite charge: 65687, both pass pT and |eta| cuts: 56954
 
 ## Kinematic shape comparison (sideband-subtracted data vs simulation)
 
-- J/psi: muon pT [GeV]: χ²/ndf = 12397/26, muon eta: χ²/ndf = 1539/23
-- Upsilon(1S): muon pT [GeV]: χ²/ndf = 782/25, muon eta: χ²/ndf = 160/23
-- Z: muon pT [GeV]: χ²/ndf = 682/26, muon eta: χ²/ndf = 392/23
+- J/psi: muon pT [GeV]: χ²/ndf = 12235/26, muon eta: χ²/ndf = 1504/23
+- Upsilon(1S): muon pT [GeV]: χ²/ndf = 780/25, muon eta: χ²/ndf = 165/23
+- Z: muon pT [GeV]: χ²/ndf = 675/26, muon eta: χ²/ndf = 401/23
 
 ## Fit validation (toy Monte Carlo, mass parameter)
 
 | | toys | pull mean | pull width |
 |---|---|---|---|
-| J/psi | 100 (+0 failed) | -0.04 ± 0.09 | 0.95 |
-| Upsilon(1S) | 100 (+0 failed) | -0.04 ± 0.09 | 0.93 |
-| Z | 98 (+2 failed) | +0.14 ± 0.09 | 0.93 |
+| J/psi | 100 (+0 failed) | -0.15 ± 0.10 | 0.98 |
+| Upsilon(1S) | 100 (+0 failed) | -0.11 ± 0.11 | 1.09 |
+| Z | 100 (+0 failed) | -0.01 ± 0.10 | 1.00 |

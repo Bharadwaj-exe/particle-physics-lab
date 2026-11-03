@@ -10,11 +10,11 @@ The project is a transparent, testable **educational simulation**. Every step ha
 | Decay | λθ = 0 for quarkonia, 1 + cos²θ (Collins–Soper) for Z; no forward–backward asymmetry, no λφ terms | small acceptance effects |
 | Z line shape | no parton luminosity, no γ*/Z interference | shape distortion far from the pole |
 | Radiation | no final-state radiation | the data show low-mass tails (absorbed by the CB shapes) that the simulation lacks |
-| Material | silicon-like slabs at the measuring surfaces only; linearised scattering; no energy loss | low-pT resolution approximate |
+| Material | sensitive layers plus a few thin passive service surfaces, calibrated to the CMS X₀(η) curve (within ±12 % in 0.5-wide \|η\| ranges); linearised Gaussian scattering; no energy loss | single-muon resolution within ±15 % of CMS at 10 GeV; about 25 % optimistic at 1 GeV centrally and about 2× optimistic at 100 GeV for \|η\| > 1.5 (forward geometry and hit resolution, no alignment) |
 | Tracking | ideal hit-to-track assignment; no fakes; scattering-agnostic weights | efficiency and resolution optimistic |
 | Muon ID | no calorimeter or muon-system simulation; muons = tracks passing pT and η cuts | real muon-ID thresholds (p ≳ 3 GeV barrel, lower forward) are approximated by the pT cut |
 | Trigger | not simulated; the data come from DoubleMu-triggered events | data pT spectra are shaped by trigger thresholds that the simulation does not have |
-| Calibration | no momentum-scale correction in simulation or data | data peaks sit below PDG (J/ψ −3.6 MeV, Z −0.24 GeV) |
+| Calibration | no momentum-scale correction in simulation or data | data peaks sit below PDG (J/ψ −3.6 MeV, Υ −16.5 MeV, Z −0.27 GeV), more so in the forward region |
 
 ## Level 3 extensions (assessed, not implemented)
 

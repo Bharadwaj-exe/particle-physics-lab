@@ -703,3 +703,54 @@ All are in `audit/results/`:
 - `pytest_full.log`
 
 The scripts are described in `audit/README.md`.
+
+---
+
+## Addendum — follow-up after the audit (3 November 2026)
+
+The audit text above is unchanged and describes the baseline. This addendum records what was done afterwards, and one correction to the audit itself.
+
+### Correction to F-DET-6
+
+F-DET-6 compared the model with the "approximately 1.5 %" in the abstract of JINST 9 (2014) P10009. That figure is a typical value over 1 < pT < 10 GeV and |η| < 1.4, so it is not a like-for-like reference for central tracks. Fig. 14 of the same paper gives σ(pT)/pT per η bin. It was digitised for the follow-up (`references/cms_muon_pt_resolution.json`), and the baseline model, with the beam-spot point as in the analysis, measured against it:
+
+| pT | \|η\| = 0.05 | 0.45 | 0.85 | 1.35 | 1.65 | 2.25 |
+|---|---|---|---|---|---|---|
+| 1 GeV | 0.66 | 0.56 | 0.50 | 0.60 | 0.67 | 0.67 |
+| 10 GeV | 0.95 | 0.82 | 0.68 | 0.60 | 0.66 | 0.63 |
+| 100 GeV | 0.83 | 0.79 | 0.70 | 0.56 | 0.47 | 0.40 |
+
+(model / CMS). At η = 0 and 10 GeV the baseline was already within 5 % of CMS. The conclusion that the model was too optimistic stands, but the gap was 1.5–2.5× away from the centre and at low pT, not a uniform factor of 2. The severity stays HIGH, because most of the data–simulation width difference came from there.
+
+The material values in §5.3 were read approximately from secondary sources. They have been replaced by a digitisation of JINST 9 P10009, Fig. 2 (`references/cms_tracker_material_x0.json`), which agrees with them (0.38 X₀ at η = 0, 1.87 X₀ at |η| ≈ 1.4, 1.3 X₀ at |η| ≈ 2.5). The PDG wording on combining layers (reference 9) has since been read. It says "it is incorrect to add the individual θ0 contributions in quadrature" and recommends applying the formula once to the combined scatterer. Reference 9 is therefore VERIFIED, and F-DET-4 is confirmed.
+
+### Status of the action items
+
+| Item | Status | What was done | Evidence |
+|---|---|---|---|
+| A1 material | done | passive surfaces plus layer thicknesses fitted to the CMS X₀(η) curve, subsystem by subsystem; within ±12 % in every 0.5 range of \|η\| (was 2–2.5× low forward) | `calibration/`, `test_material_budget_matches_the_cms_reference` |
+| A2 Highland | done | logarithm on the combined thickness along the track, as the PDG recommends | `test_highland_is_applied_to_the_combined_thickness` |
+| A3 resolution | done | per-η comparison with CMS Fig. 14; 10 GeV within ±15 % at all η; remaining differences recorded as D11 and D12 | `outputs/figures/cms_reference_comparison.png`, `physics/DETECTOR_MODEL.md` |
+| A4 fitter | done | bounded fallbacks; smooth BW convolution (the jitter in −ln L was the root cause of the failed convergence); separate optimiser and Hessian status | ADR-17, three new tests |
+| A5 systematics | done | window, binning and model variations; masses by detector region | `analysis/systematics.py`, `outputs/report.md` |
+| A12 provenance | done | outputs regenerated from a clean commit; the dirty check no longer counts the run's own output folders; data paths stored relative to the project | `outputs/run_record.json` |
+| A13 run record | partly | PyVista, pyvistaqt and VTK versions recorded; analysis settings and a hash of the particle file not yet | `particlelab/provenance.py` |
+| A16 logging | done | output survives a non-UTF-8 redirect | `test_run_analysis_logging_survives_a_non_utf8_redirect` |
+| A10 D1 entry | done (docs) | debt entry corrected to the measured offset and its cause | `engineering/TECHNICAL_DEBT.md` |
+| Others | open | A6–A9, A11, A14, A15, A17–A22 | `AUDIT_ACTION_ITEMS.md` |
+
+### Effect on the results
+
+| | before the fixes | after |
+|---|---|---|
+| sim/data FWHM, J/ψ | 0.74 | 1.07 |
+| sim/data FWHM, Υ(1S) | 0.66 | 0.96 |
+| sim/data FWHM, Z | 0.79 | 0.94 |
+| data Z mass | 90.948 ± 0.039 GeV (stat only) | 90.915 ± 0.076 (stat) ± 0.030 (syst) GeV |
+| data J/ψ, Υ masses | stat only | ± 0.28 MeV and ± 1.1 MeV syst added |
+| toy pull widths (J/ψ, Υ, Z) | 0.95, 0.93, 0.93 | 0.98, 1.09, 1.00 |
+| fit of the barrel–barrel Z subsample | crashed | converges (mass 90.98 ± 0.13 GeV) |
+
+The data–simulation width difference is now within about 10 %, consistent with the remaining known omissions (FSR, alignment, forward high-pT resolution, different η mixes). The regional mass pattern of F-DAT-3 is confirmed by the robust fitter. Its interpretation in `CMS_DATA_COMPARISON.md` now separates facts from hypotheses, which also covers most of A6.
+
+All numbers are from `outputs/`, regenerated from a clean commit with `configs/default.json`.
