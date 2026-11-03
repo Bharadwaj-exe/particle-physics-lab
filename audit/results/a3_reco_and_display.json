@@ -1,0 +1,83 @@
+{
+  "J/psi_pipeline_mass_vs_independent_max_rel": 4.440892098500626e-16,
+  "J/psi_ideal_detector_reco_minus_true_max_rel": 6.905587213168474e-14,
+  "J/psi_reco_minus_matches_true_minus_frac": 1.0,
+  "J/psi_reco_minus_true_mean_MeV": -0.8007218117698872,
+  "Z_pipeline_mass_vs_independent_max_rel": 3.3306690738754696e-16,
+  "Z_ideal_detector_reco_minus_true_max_rel": 6.610045844013257e-12,
+  "Z_reco_minus_matches_true_minus_frac": 1.0,
+  "Z_reco_minus_true_mean_MeV": 4.764795498686821,
+  "edge_cases": {
+    "low_pT_1GeV_eta0": {
+      "efficiency": 1.0,
+      "mean_rel": -1.667632230541997e-05,
+      "robust_sigma": 0.004596091551900052,
+      "charge_misid": 0.0,
+      "finite": true
+    },
+    "pT3_eta2.35": {
+      "efficiency": 0.99915,
+      "mean_rel": 0.0003104554247656843,
+      "robust_sigma": 0.01693805744111238,
+      "charge_misid": 0.0,
+      "finite": true
+    },
+    "pT20_eta0_eff0.80": {
+      "efficiency": 0.96865,
+      "mean_rel": 0.00012042842656294623,
+      "robust_sigma": 0.00797936054354254,
+      "charge_misid": 0.0,
+      "finite": true
+    },
+    "pT20_eta2.45": {
+      "efficiency": 0.99405,
+      "mean_rel": 0.0010053842519151728,
+      "robust_sigma": 0.023569764412193238,
+      "charge_misid": 0.0,
+      "finite": true
+    },
+    "loopers_pT0.6": {
+      "efficiency": 1.0,
+      "mean_rel": 3.337361221422008e-06,
+      "robust_sigma": 0.0027628004073048883,
+      "charge_misid": 0.0,
+      "finite": true
+    }
+  },
+  "display_coordinates": {
+    "max_circle_rel_err": 3.813833009332578e-16,
+    "max_start_offset_m": 0.0,
+    "max_dzds_err": 2.7533531010703882e-14,
+    "true_path_starts_at_vertex_max_dz": 0.0,
+    "hits_ideal_on_true_circle_max_rel": 3.813833009332578e-16,
+    "magnification_mutates_data": false,
+    "reco_differs_from_true_count": 30,
+    "label_charge_consistent": true,
+    "display_mass_max_rel_err": 2.220446049250313e-16,
+    "display_event_reproducible": true
+  },
+  "zr_projection_preserves_radius_max_err": 0.0,
+  "zr_sign_taken_from_true_path": true,
+  "geometry_barrels_match": true,
+  "geometry_disks_match": true,
+  "beam_pipe_inside_first_layer": true,
+  "scene": {
+    "camera_presets_distinct": true,
+    "beam_view_looks_along_z": true,
+    "zoom_changes_view": true,
+    "rotation_changes_position": true,
+    "geometry_cached": true,
+    "magnification_leaves_event_unchanged": true,
+    "true_scale_hits_equal_simulation": true,
+    "renderer_actor_count_after_300_updates": 21,
+    "builder_actor_count": 19,
+    "update_ms_median": 102.27309999754652,
+    "update_ms_p95": 131.9986099988455,
+    "rss_MB_start_50_300": [
+      252.84375,
+      254.3203125,
+      254.66796875
+    ],
+    "rss_growth_MB_per_100_updates_after_warmup": 0.1390625
+  }
+}

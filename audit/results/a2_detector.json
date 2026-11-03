@@ -1,0 +1,200 @@
+{
+  "C_TRACK_from_SI": 0.299792458,
+  "helix_vs_rk4": [
+    {
+      "pt": 5.0,
+      "eta": 0.0,
+      "q": 1,
+      "max_hit_vs_rk4_um": 0.0011308513228294786,
+      "turn_sign": -1,
+      "clockwise_for_positive": true,
+      "momentum_magnitude_drift": 3.552713678800501e-15
+    },
+    {
+      "pt": 5.0,
+      "eta": 0.0,
+      "q": -1,
+      "max_hit_vs_rk4_um": 0.0011308485937605547,
+      "turn_sign": 1,
+      "clockwise_for_positive": true,
+      "momentum_magnitude_drift": 1.7763568394002505e-15
+    },
+    {
+      "pt": 1.5,
+      "eta": 0.8,
+      "q": 1,
+      "max_hit_vs_rk4_um": 0.0021383127415250404,
+      "turn_sign": -1,
+      "clockwise_for_positive": true,
+      "momentum_magnitude_drift": 2.220446049250313e-16
+    },
+    {
+      "pt": 20.0,
+      "eta": -1.2,
+      "q": -1,
+      "max_hit_vs_rk4_um": 8.629426761624684e-05,
+      "turn_sign": 1,
+      "clockwise_for_positive": true,
+      "momentum_magnitude_drift": 4.440892098500626e-16
+    },
+    {
+      "pt": 45.0,
+      "eta": 0.3,
+      "q": 1,
+      "max_hit_vs_rk4_um": 0.00011474269178847489,
+      "turn_sign": -1,
+      "clockwise_for_positive": true,
+      "momentum_magnitude_drift": 1.7763568394002505e-15
+    }
+  ],
+  "highland_two_layer": {
+    "theta0_pred_mrad": 0.5391124474545248,
+    "rphi_rms_um": 483.123316344648,
+    "rphi_pred_um": 489.5601384924899,
+    "z_rms_um": 486.2191709337191,
+    "z_pred_um": 486.37300223469134,
+    "ratio_rphi": 0.9868518254618055,
+    "ratio_z": 0.9996837174344271
+  },
+  "highland_per_layer_vs_total_eta0_10GeV": {
+    "per_layer_mrad": 0.7051887755562447,
+    "total_mrad": 0.7843206381165284,
+    "ratio": 0.8991077644593015,
+    "x_total": 0.3600000000000001
+  },
+  "detected_subset_of_crossed": true,
+  "mean_missed_fraction": 0.010056079156757436,
+  "fit_unchanged_when_undetected_hits_moved_and_truth_arclength_scrambled": true,
+  "charge_misid_rate": 0.0,
+  "zfit_fallback_tracks": 0,
+  "zfit_fallback_fraction_of_ok": 0.0,
+  "hits_bitwise_reproducible": true,
+  "curvature_offset_5GeV": {
+    "eta0.0_full": {
+      "mean": -1.3361676772216208e-05,
+      "se": 1.5660252887325964e-05,
+      "pull": -0.853222286278019,
+      "n": 200000,
+      "rms": 0.0070034780001796415
+    },
+    "eta0.0_no_ms": {
+      "mean": 1.3838960645256326e-06,
+      "se": 1.6362336750310526e-06,
+      "pull": 0.8457814343048335,
+      "n": 200000,
+      "rms": 0.0007317459448887468
+    },
+    "eta0.0_no_smear": {
+      "mean": -1.4541656692040366e-05,
+      "se": 1.5571812082102445e-05,
+      "pull": -0.9338448611741151,
+      "n": 200000,
+      "rms": 0.00696392606968672
+    },
+    "eta0.0_ideal": {
+      "mean": -9.383438470678129e-17,
+      "se": 2.6095823270258168e-17,
+      "pull": -3.5957625760642644,
+      "n": 200000,
+      "rms": 1.1670406952223625e-14
+    },
+    "eta0.0_full_no_beamspot": {
+      "mean": -1.5562946238488596e-05,
+      "se": 1.594820859435077e-05,
+      "pull": -0.9758429071464088,
+      "n": 200000,
+      "rms": 0.007132255707262939
+    },
+    "eta0.0_full_z_vertex_0": {
+      "mean": 1.2808033256098777e-05,
+      "se": 1.5684161549663398e-05,
+      "pull": 0.8166221200631317,
+      "n": 200000,
+      "rms": 0.007014170279027161
+    },
+    "eta2.3_full": {
+      "mean": -6.449953348550735e-05,
+      "se": 3.7276729640686764e-05,
+      "pull": -1.7302894891054892,
+      "n": 199945,
+      "rms": 0.016668367917689848
+    },
+    "eta2.3_no_ms": {
+      "mean": -3.210702212651798e-05,
+      "se": 8.381254770992351e-06,
+      "pull": -3.830813285576387,
+      "n": 199960,
+      "rms": 0.003747836241085643
+    },
+    "eta2.3_no_smear": {
+      "mean": -3.419055843003033e-05,
+      "se": 3.634649713646288e-05,
+      "pull": -0.9406837281089816,
+      "n": 199960,
+      "rms": 0.0162530221221783
+    },
+    "eta2.3_ideal": {
+      "mean": -1.714023367682671e-16,
+      "se": 1.0687139934012407e-16,
+      "pull": -1.6038185878222648,
+      "n": 200000,
+      "rms": 4.779434275500872e-14
+    },
+    "eta2.3_full_no_beamspot": {
+      "mean": -5.5750827844993355e-05,
+      "se": 4.157190379754656e-05,
+      "pull": -1.3410698753777928,
+      "n": 199945,
+      "rms": 0.018588964059228767
+    },
+    "eta2.3_full_z_vertex_0": {
+      "mean": -2.6376743039250377e-05,
+      "se": 3.791822838673638e-05,
+      "pull": -0.695621714449002,
+      "n": 200000,
+      "rms": 0.016957547251820946
+    }
+  },
+  "acceptance_material_vs_eta_20GeV": {
+    "0.0": {
+      "frac_ge8_hits": 1.0,
+      "mean_hits": 12.8555,
+      "material_X0": 0.3600000000000001
+    },
+    "1.0": {
+      "frac_ge8_hits": 1.0,
+      "mean_hits": 12.85725,
+      "material_X0": 0.574251141510071
+    },
+    "1.5": {
+      "frac_ge8_hits": 1.0,
+      "mean_hits": 14.463,
+      "material_X0": 0.7686300678623107
+    },
+    "2.0": {
+      "frac_ge8_hits": 1.0,
+      "mean_hits": 15.10975,
+      "material_X0": 0.7578155264134836
+    },
+    "2.2": {
+      "frac_ge8_hits": 1.0,
+      "mean_hits": 13.35975,
+      "material_X0": 0.68609892618994
+    },
+    "2.4": {
+      "frac_ge8_hits": 0.998,
+      "mean_hits": 10.9295,
+      "material_X0": 0.5779487970342868
+    },
+    "2.5": {
+      "frac_ge8_hits": 0.951,
+      "mean_hits": 9.7275,
+      "material_X0": 0.5044341683983941
+    },
+    "2.7": {
+      "frac_ge8_hits": 0.36,
+      "mean_hits": 7.14625,
+      "material_X0": 0.3771793605379887
+    }
+  }
+}

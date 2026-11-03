@@ -1,0 +1,14 @@
+........................................................................ [ 77%]
+.....................                                                    [100%]
+============================ slowest 10 durations =============================
+33.92s call     tests/physics_validation/test_physics_validation.py::test_fit_recovers_input_mass_ideal_detector[J/psi]
+31.70s call     tests/physics_validation/test_physics_validation.py::test_toy_pulls_have_unit_width
+24.42s call     tests/integration/test_pipeline.py::test_data_simulation_comparison_runs
+18.80s call     tests/visualization/test_view3d.py::test_gui_stays_responsive_while_pyvista_loads
+10.82s call     tests/integration/test_pipeline.py::test_parallel_matches_serial
+5.31s call     tests/physics_validation/test_physics_validation.py::test_fit_recovers_input_mass_ideal_detector[Z]
+5.00s call     tests/physics_validation/test_physics_validation.py::test_zero_smearing_reconstructs_input_mass_exactly[Z]
+4.56s call     tests/physics_validation/test_physics_validation.py::test_fit_recovers_input_mass_ideal_detector[Upsilon(1S)]
+3.23s call     tests/physics_validation/test_physics_validation.py::test_zero_smearing_reconstructs_input_mass_exactly[Upsilon(1S)]
+2.67s call     tests/physics_validation/test_physics_validation.py::test_zero_smearing_reconstructs_input_mass_exactly[J/psi]
+93 passed in 308.13s (0:05:08)

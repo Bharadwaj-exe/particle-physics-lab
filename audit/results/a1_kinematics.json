@@ -1,0 +1,100 @@
+{
+  "sym_energy_conservation": true,
+  "sym_onshell_1": true,
+  "sym_onshell_2": true,
+  "sym_equal_mass_p": true,
+  "sym_lambda_threshold": true,
+  "rest_0.211317": {
+    "max_dp_sum": 0.0,
+    "max_dE": 0.0,
+    "max_dp_rel": 2.220446049250313e-16,
+    "max_mass_err": 0.0
+  },
+  "rest_3.0969": {
+    "max_dp_sum": 0.0,
+    "max_dE": 0.0,
+    "max_dp_rel": 3.3306690738754696e-16,
+    "max_mass_err": 6.050715484207103e-15
+  },
+  "rest_9.4604": {
+    "max_dp_sum": 0.0,
+    "max_dE": 0.0,
+    "max_dp_rel": 2.220446049250313e-16,
+    "max_mass_err": 4.649058915617843e-14
+  },
+  "rest_91.1879": {
+    "max_dp_sum": 0.0,
+    "max_dE": 0.0,
+    "max_dp_rel": 3.3306690738754696e-16,
+    "max_mass_err": 4.79544182141467e-12
+  },
+  "below_threshold_raises": true,
+  "boost_vs_matrix_max_rel_err": 4.705605290682333e-15,
+  "invmass_random": {
+    "stable_max_rel": 2.220446049250313e-16,
+    "naive_max_rel": 4.973799150320701e-14
+  },
+  "invmass_collinear_1TeV": {
+    "stable_max_rel": 4.440892098500626e-16,
+    "naive_max_rel": 1.6598171281856366e-08
+  },
+  "invmass_back_to_back": {
+    "stable_max_rel": 2.220446049250313e-16,
+    "naive_max_rel": 2.220446049250313e-16
+  },
+  "invmass_low_p": {
+    "stable_max_rel": 2.220446049250313e-16,
+    "naive_max_rel": 2.220446049250313e-16
+  },
+  "generated_mass_preserved_max_rel": 2.930988785010413e-14,
+  "four_momentum_conservation_max": 1.673470251262188e-10,
+  "angular": {
+    "Z CS": {
+      "lambda_theta": 0.9985757747494527,
+      "err": 0.046200371053158655,
+      "mean_cos": -0.00023845753003825151,
+      "mean_cos_err": 0.004471737394521442
+    },
+    "Z helicity": {
+      "lambda_theta": 0.9061734342961227,
+      "err": 0.04295891360605106,
+      "mean_cos": 7.284833928615094e-05,
+      "mean_cos_err": 0.0044451995476382155
+    },
+    "J/psi CS": {
+      "lambda_theta": 0.004459639684405859,
+      "err": 0.024636687951358767,
+      "mean_cos": 9.149224165041314e-05,
+      "mean_cos_err": 0.004084906051355895
+    },
+    "J/psi helicity": {
+      "lambda_theta": 0.016160532336319977,
+      "err": 0.024447923099753306,
+      "mean_cos": -0.002808810660242367,
+      "mean_cos_err": 0.004091174886160104
+    },
+    "Upsilon(1S) CS": {
+      "lambda_theta": 0.0034773223379805877,
+      "err": 0.024662469637792648,
+      "mean_cos": 0.0001291435138087362,
+      "mean_cos_err": 0.004084372988074975
+    },
+    "Upsilon(1S) helicity": {
+      "lambda_theta": 0.012567973578081993,
+      "err": 0.024582170274148385,
+      "mean_cos": -0.0025071139387403633,
+      "mean_cos_err": 0.004089251400485044
+    },
+    "Z CS formula vs independent max diff": 5.652941247324961e-06
+  },
+  "pt_spectrum_KS_p": 0.11347330223272245,
+  "y_spectrum_KS_p": 0.8199942291725069,
+  "Z_mass_sampling": {
+    "sample_mean": 91.63438751835055,
+    "ref_mean": 91.62776383758184,
+    "pull": 0.8808484104301372,
+    "KS_p": null
+  },
+  "Z_rbw_mode_minus_M_MeV": -8.529999999993265,
+  "Z_fixed_vs_running_shift_MeV_theory": 34.14663705381964
+}

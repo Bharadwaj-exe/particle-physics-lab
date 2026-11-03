@@ -1,0 +1,25 @@
+04:49:48 data: {'validated events': 100000, 'both muons pT > 3.0 GeV': 93469, 'both muons |eta| < 2.4': 93469}
+04:49:51 simulating J/psi: 1000000 events
+04:52:34   12184 selected (1.22%) in 163 s
+04:52:38    {'data_mass': 3.0933, 'sim_mass': 3.0973, 'data_fwhm_MeV': np.float64(62.0164), 'sim_fwhm_MeV': np.float64(45.7612), 'data_fit_pvalue': 0.2386}
+04:52:38 simulating Upsilon(1S): 200000 events
+04:53:23   60637 selected (30.32%) in 45 s
+04:53:45    {'data_mass': 9.4439, 'sim_mass': 9.4615, 'data_fwhm_MeV': np.float64(214.1959), 'sim_fwhm_MeV': np.float64(141.7222), 'data_fit_pvalue': 0.233}
+04:53:45 simulating Z: 100000 events
+04:54:10   56948 selected (56.95%) in 25 s
+04:54:35    {'data_mass': 90.948, 'sim_mass': 91.1896, 'data_fwhm_MeV': np.float64(4437.9567), 'sim_fwhm_MeV': np.float64(3523.4398), 'data_fit_pvalue': 0.3612}
+04:54:50 resolution studies …
+04:55:45 toys J/psi …
+04:56:14 toys Upsilon(1S) …
+04:56:42 toys Z …
+04:57:10 Traceback (most recent call last):
+  File "run_analysis.py", line 340, in <module>
+    main()
+  File "run_analysis.py", line 307, in main
+    log(f"done in {time.time() - t0:.0f} s \u2192 {out}")
+  File "run_analysis.py", line 38, in log
+    print(time.strftime("%H:%M:%S"), *a, flush=True)
+  File "C:\Program Files\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 14: character maps to <undefined>

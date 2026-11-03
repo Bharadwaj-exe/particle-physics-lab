@@ -1,0 +1,326 @@
+{
+  "module_edges": {
+    "particlelab.provenance": [
+      "particlelab",
+      "particlelab.detector",
+      "particlelab.domain.particles"
+    ],
+    "particlelab.units": [],
+    "particlelab": [],
+    "particlelab.analysis.compare": [
+      "particlelab.analysis.fitting",
+      "particlelab.analysis.pipeline",
+      "particlelab.domain.particles",
+      "particlelab.physics.kinematics"
+    ],
+    "particlelab.analysis.fitting": [
+      "particlelab.analysis.shapes",
+      "particlelab.domain.particles"
+    ],
+    "particlelab.analysis.pipeline": [
+      "particlelab.detector",
+      "particlelab.physics"
+    ],
+    "particlelab.analysis.shapes": [
+      "particlelab.physics.production"
+    ],
+    "particlelab.analysis.studies": [
+      "particlelab.analysis.fitting",
+      "particlelab.detector"
+    ],
+    "particlelab.analysis": [
+      "particlelab.analysis.fitting",
+      "particlelab.analysis.pipeline",
+      "particlelab.analysis.studies"
+    ],
+    "particlelab.app.desktop": [
+      "particlelab.analysis",
+      "particlelab.analysis.compare",
+      "particlelab.analysis.studies",
+      "particlelab.app.view3d",
+      "particlelab.data",
+      "particlelab.detector",
+      "particlelab.domain.conservation",
+      "particlelab.domain.particles",
+      "particlelab.physics",
+      "particlelab.physics.kinematics",
+      "particlelab.provenance",
+      "particlelab.units",
+      "particlelab.visualization.event_display"
+    ],
+    "particlelab.app.view3d": [
+      "particlelab.visualization.event_display"
+    ],
+    "particlelab.app": [],
+    "particlelab.data.cms": [
+      "particlelab.physics.kinematics"
+    ],
+    "particlelab.data": [],
+    "particlelab.detector.geometry": [
+      "particlelab.units"
+    ],
+    "particlelab.detector.simulation": [
+      "particlelab.detector.geometry",
+      "particlelab.physics.kinematics",
+      "particlelab.units"
+    ],
+    "particlelab.detector.tracking": [
+      "particlelab.detector.geometry",
+      "particlelab.detector.simulation",
+      "particlelab.units"
+    ],
+    "particlelab.detector": [
+      "particlelab.detector.geometry",
+      "particlelab.detector.simulation",
+      "particlelab.detector.tracking"
+    ],
+    "particlelab.domain.conservation": [
+      "particlelab.domain.particles"
+    ],
+    "particlelab.domain.particles": [],
+    "particlelab.domain": [],
+    "particlelab.physics.decay": [
+      "particlelab.physics.kinematics",
+      "particlelab.physics.production"
+    ],
+    "particlelab.physics.kinematics": [
+      "particlelab.domain.particles"
+    ],
+    "particlelab.physics.production": [
+      "particlelab.domain.particles"
+    ],
+    "particlelab.physics": [
+      "particlelab.physics.decay",
+      "particlelab.physics.kinematics",
+      "particlelab.physics.production"
+    ],
+    "particlelab.visualization.event_display": [
+      "particlelab.detector",
+      "particlelab.detector.simulation",
+      "particlelab.physics",
+      "particlelab.units"
+    ],
+    "particlelab.visualization": []
+  },
+  "layer_edges": [
+    [
+      "analysis",
+      "detector"
+    ],
+    [
+      "analysis",
+      "domain"
+    ],
+    [
+      "analysis",
+      "physics"
+    ],
+    [
+      "app",
+      "analysis"
+    ],
+    [
+      "app",
+      "data"
+    ],
+    [
+      "app",
+      "detector"
+    ],
+    [
+      "app",
+      "domain"
+    ],
+    [
+      "app",
+      "physics"
+    ],
+    [
+      "app",
+      "provenance"
+    ],
+    [
+      "app",
+      "units"
+    ],
+    [
+      "app",
+      "visualization"
+    ],
+    [
+      "data",
+      "physics"
+    ],
+    [
+      "detector",
+      "physics"
+    ],
+    [
+      "detector",
+      "units"
+    ],
+    [
+      "physics",
+      "domain"
+    ],
+    [
+      "provenance",
+      "detector"
+    ],
+    [
+      "provenance",
+      "domain"
+    ],
+    [
+      "provenance",
+      "root"
+    ],
+    [
+      "visualization",
+      "detector"
+    ],
+    [
+      "visualization",
+      "physics"
+    ],
+    [
+      "visualization",
+      "units"
+    ]
+  ],
+  "external_by_module": {
+    "particlelab.provenance": [
+      "__future__",
+      "dataclasses",
+      "datetime",
+      "importlib",
+      "json",
+      "numpy",
+      "pathlib",
+      "platform",
+      "subprocess",
+      "sys"
+    ],
+    "particlelab.units": [
+      "typing"
+    ],
+    "particlelab.analysis.compare": [
+      "__future__",
+      "dataclasses",
+      "numpy"
+    ],
+    "particlelab.analysis.fitting": [
+      "__future__",
+      "dataclasses",
+      "numpy",
+      "scipy"
+    ],
+    "particlelab.analysis.pipeline": [
+      "__future__",
+      "concurrent",
+      "dataclasses",
+      "numpy",
+      "os"
+    ],
+    "particlelab.analysis.shapes": [
+      "__future__",
+      "numpy",
+      "scipy"
+    ],
+    "particlelab.analysis.studies": [
+      "__future__",
+      "dataclasses",
+      "numpy"
+    ],
+    "particlelab.app.desktop": [
+      "PySide6",
+      "__future__",
+      "json",
+      "numpy",
+      "pathlib",
+      "pyqtgraph",
+      "sys",
+      "traceback"
+    ],
+    "particlelab.app.view3d": [
+      "PySide6",
+      "__future__",
+      "numpy",
+      "os",
+      "pyvista",
+      "pyvistaqt",
+      "threading",
+      "time"
+    ],
+    "particlelab.data.cms": [
+      "__future__",
+      "collections",
+      "dataclasses",
+      "datetime",
+      "json",
+      "numpy",
+      "pandas",
+      "pathlib",
+      "urllib",
+      "zlib"
+    ],
+    "particlelab.detector.geometry": [
+      "__future__",
+      "dataclasses",
+      "numpy"
+    ],
+    "particlelab.detector.simulation": [
+      "__future__",
+      "dataclasses",
+      "numpy"
+    ],
+    "particlelab.detector.tracking": [
+      "__future__",
+      "dataclasses",
+      "numpy"
+    ],
+    "particlelab.domain.conservation": [
+      "__future__",
+      "dataclasses",
+      "numpy"
+    ],
+    "particlelab.domain.particles": [
+      "__future__",
+      "dataclasses",
+      "functools",
+      "json",
+      "pathlib",
+      "typing"
+    ],
+    "particlelab.physics.decay": [
+      "__future__",
+      "dataclasses",
+      "numpy"
+    ],
+    "particlelab.physics.kinematics": [
+      "__future__",
+      "numpy"
+    ],
+    "particlelab.physics.production": [
+      "__future__",
+      "dataclasses",
+      "numpy"
+    ],
+    "particlelab.visualization.event_display": [
+      "__future__",
+      "dataclasses",
+      "numpy"
+    ]
+  },
+  "qt_or_pyvista_outside_app": [],
+  "cycles": [],
+  "broad_exception_handlers": [
+    "particlelab.app.desktop:53",
+    "particlelab.app.view3d:165"
+  ],
+  "global_statements": [],
+  "hardcoded_constants": [
+    "particlelab.units:21: C_TRACK: Final = 0.299792458",
+    "particlelab.units:24: HIGHLAND_E0: Final = 13.6 * MeV"
+  ]
+}

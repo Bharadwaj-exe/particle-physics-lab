@@ -1,0 +1,33 @@
+{
+  "path": "data\\raw\\Dimuon_DoubleMu.csv",
+  "n_rows": 100000,
+  "n_valid": 100000,
+  "rejected": {
+    "non-finite or non-numeric value": 0,
+    "charge not ±1": 0,
+    "unknown muon type": 0,
+    "muon 1: E < |p|": 0,
+    "muon 2: E < |p|": 0,
+    "not opposite charge": 0
+  },
+  "n_rejected": 0,
+  "warnings": {
+    "muon 1: published pt differs from hypot(px,py) by > 0.1%+2 MeV (row kept)": 2886,
+    "muon 1: published eta differs from recomputed by > 0.002 (row kept)": 82,
+    "muon 2: published pt differs from hypot(px,py) by > 0.1%+2 MeV (row kept)": 3218,
+    "muon 2: published eta differs from recomputed by > 0.002 (row kept)": 71,
+    "published M differs from recomputed M by > 0.1%+1 MeV (row kept; recomputed M used)": 0
+  },
+  "mass_check": {
+    "median_abs_diff_GeV": 3.777800934634534e-05,
+    "max_abs_diff_GeV": 0.00060062874462119,
+    "muon_mass_GeV": 0.1056583755
+  },
+  "file_check": {
+    "path": "data\\raw\\Dimuon_DoubleMu.csv",
+    "size": 13935840,
+    "adler32": "5b87a72a",
+    "size_ok": true,
+    "checksum_ok": true
+  }
+}

@@ -1,0 +1,498 @@
+{
+  "created_utc": "2026-11-02T23:27:09+00:00",
+  "environment": {
+    "particlelab": "0.2.0",
+    "python": "3.11.8",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.3.5",
+      "scipy": "1.17.1",
+      "pandas": "3.0.5",
+      "matplotlib": "3.10.8",
+      "PySide6": "6.12.0",
+      "pyqtgraph": "0.14.0"
+    },
+    "git": {
+      "commit": "440ef55bc00434ded64caddd84a17fc5c9d5c6ac",
+      "dirty": true
+    }
+  },
+  "config": {
+    "seed": 20261102,
+    "events": {
+      "J/psi": 1000000,
+      "Upsilon(1S)": 200000,
+      "Z": 100000
+    },
+    "detector": "cms_inspired",
+    "detector_overrides": {},
+    "resolution_scale": 1.0,
+    "material_scale": 1.0,
+    "pt_min": 3.0,
+    "eta_max": 2.4,
+    "toys": 100,
+    "output_dir": "audit/results/rerun_default"
+  },
+  "detector": {
+    "name": "CMS-inspired tracker (educational model)",
+    "B": 3.8,
+    "barrels": [
+      {
+        "name": "PXB1",
+        "radius": 0.044000000000000004,
+        "half_length": 0.265,
+        "sigma_rphi": 9.999999999999999e-06,
+        "sigma_z": 1.9999999999999998e-05,
+        "x_over_X0": 0.02
+      },
+      {
+        "name": "PXB2",
+        "radius": 0.073,
+        "half_length": 0.265,
+        "sigma_rphi": 9.999999999999999e-06,
+        "sigma_z": 1.9999999999999998e-05,
+        "x_over_X0": 0.02
+      },
+      {
+        "name": "PXB3",
+        "radius": 0.102,
+        "half_length": 0.265,
+        "sigma_rphi": 9.999999999999999e-06,
+        "sigma_z": 1.9999999999999998e-05,
+        "x_over_X0": 0.02
+      },
+      {
+        "name": "TIB1",
+        "radius": 0.255,
+        "half_length": 0.7000000000000001,
+        "sigma_rphi": 2.9999999999999997e-05,
+        "sigma_z": 0.0005,
+        "x_over_X0": 0.03
+      },
+      {
+        "name": "TIB2",
+        "radius": 0.33899999999999997,
+        "half_length": 0.7000000000000001,
+        "sigma_rphi": 2.9999999999999997e-05,
+        "sigma_z": 0.0005,
+        "x_over_X0": 0.03
+      },
+      {
+        "name": "TIB3",
+        "radius": 0.418,
+        "half_length": 0.7000000000000001,
+        "sigma_rphi": 2.9999999999999997e-05,
+        "sigma_z": null,
+        "x_over_X0": 0.03
+      },
+      {
+        "name": "TIB4",
+        "radius": 0.498,
+        "half_length": 0.7000000000000001,
+        "sigma_rphi": 2.9999999999999997e-05,
+        "sigma_z": null,
+        "x_over_X0": 0.03
+      },
+      {
+        "name": "TOB1",
+        "radius": 0.555,
+        "half_length": 1.18,
+        "sigma_rphi": 4.4999999999999996e-05,
+        "sigma_z": 0.0005,
+        "x_over_X0": 0.03
+      },
+      {
+        "name": "TOB2",
+        "radius": 0.635,
+        "half_length": 1.18,
+        "sigma_rphi": 4.4999999999999996e-05,
+        "sigma_z": 0.0005,
+        "x_over_X0": 0.03
+      },
+      {
+        "name": "TOB3",
+        "radius": 0.715,
+        "half_length": 1.18,
+        "sigma_rphi": 4.4999999999999996e-05,
+        "sigma_z": null,
+        "x_over_X0": 0.03
+      },
+      {
+        "name": "TOB4",
+        "radius": 0.795,
+        "half_length": 1.18,
+        "sigma_rphi": 4.4999999999999996e-05,
+        "sigma_z": null,
+        "x_over_X0": 0.03
+      },
+      {
+        "name": "TOB5",
+        "radius": 0.895,
+        "half_length": 1.18,
+        "sigma_rphi": 4.4999999999999996e-05,
+        "sigma_z": null,
+        "x_over_X0": 0.03
+      },
+      {
+        "name": "TOB6",
+        "radius": 1.08,
+        "half_length": 1.18,
+        "sigma_rphi": 4.4999999999999996e-05,
+        "sigma_z": null,
+        "x_over_X0": 0.03
+      }
+    ],
+    "disks": [
+      {
+        "name": "FPIX1",
+        "z": 0.34500000000000003,
+        "r_min": 0.06,
+        "r_max": 0.15,
+        "sigma_rphi": 1.4999999999999999e-05,
+        "sigma_r": 1.9999999999999998e-05,
+        "x_over_X0": 0.03
+      },
+      {
+        "name": "FPIX2",
+        "z": 0.465,
+        "r_min": 0.06,
+        "r_max": 0.15,
+        "sigma_rphi": 1.4999999999999999e-05,
+        "sigma_r": 1.9999999999999998e-05,
+        "x_over_X0": 0.03
+      },
+      {
+        "name": "TID1",
+        "z": 0.8,
+        "r_min": 0.2,
+        "r_max": 0.5,
+        "sigma_rphi": 3.5e-05,
+        "sigma_r": 0.001,
+        "x_over_X0": 0.04
+      },
+      {
+        "name": "TID2",
+        "z": 0.9,
+        "r_min": 0.2,
+        "r_max": 0.5,
+        "sigma_rphi": 3.5e-05,
+        "sigma_r": 0.001,
+        "x_over_X0": 0.04
+      },
+      {
+        "name": "TID3",
+        "z": 1.0,
+        "r_min": 0.2,
+        "r_max": 0.5,
+        "sigma_rphi": 3.5e-05,
+        "sigma_r": 0.001,
+        "x_over_X0": 0.04
+      },
+      {
+        "name": "TEC1",
+        "z": 1.24,
+        "r_min": 0.22,
+        "r_max": 1.1300000000000001,
+        "sigma_rphi": 3.9999999999999996e-05,
+        "sigma_r": 0.001,
+        "x_over_X0": 0.05
+      },
+      {
+        "name": "TEC2",
+        "z": 1.425,
+        "r_min": 0.22,
+        "r_max": 1.1300000000000001,
+        "sigma_rphi": 3.9999999999999996e-05,
+        "sigma_r": null,
+        "x_over_X0": 0.05
+      },
+      {
+        "name": "TEC3",
+        "z": 1.61,
+        "r_min": 0.22,
+        "r_max": 1.1300000000000001,
+        "sigma_rphi": 3.9999999999999996e-05,
+        "sigma_r": 0.001,
+        "x_over_X0": 0.05
+      },
+      {
+        "name": "TEC4",
+        "z": 1.795,
+        "r_min": 0.22,
+        "r_max": 1.1300000000000001,
+        "sigma_rphi": 3.9999999999999996e-05,
+        "sigma_r": null,
+        "x_over_X0": 0.05
+      },
+      {
+        "name": "TEC5",
+        "z": 1.98,
+        "r_min": 0.22,
+        "r_max": 1.1300000000000001,
+        "sigma_rphi": 3.9999999999999996e-05,
+        "sigma_r": 0.001,
+        "x_over_X0": 0.05
+      },
+      {
+        "name": "TEC6",
+        "z": 2.165,
+        "r_min": 0.22,
+        "r_max": 1.1300000000000001,
+        "sigma_rphi": 3.9999999999999996e-05,
+        "sigma_r": null,
+        "x_over_X0": 0.05
+      },
+      {
+        "name": "TEC7",
+        "z": 2.35,
+        "r_min": 0.22,
+        "r_max": 1.1300000000000001,
+        "sigma_rphi": 3.9999999999999996e-05,
+        "sigma_r": 0.001,
+        "x_over_X0": 0.05
+      },
+      {
+        "name": "TEC8",
+        "z": 2.535,
+        "r_min": 0.22,
+        "r_max": 1.1300000000000001,
+        "sigma_rphi": 3.9999999999999996e-05,
+        "sigma_r": null,
+        "x_over_X0": 0.05
+      },
+      {
+        "name": "TEC9",
+        "z": 2.72,
+        "r_min": 0.22,
+        "r_max": 1.1300000000000001,
+        "sigma_rphi": 3.9999999999999996e-05,
+        "sigma_r": 0.001,
+        "x_over_X0": 0.05
+      }
+    ],
+    "hit_efficiency": 0.99,
+    "multiple_scattering": true,
+    "smear": true,
+    "vertex_sigma_z": 0.06,
+    "beamspot_constraint": 1.9999999999999998e-05,
+    "min_hits": 8,
+    "eta_max": 2.4,
+    "pt_min": 3.0
+  },
+  "particle_data": {
+    "source": "Particle Data Group, Review of Particle Physics, PDG Live, 2026 edition (Int. J. Mod. Phys. A 41, 2630011 (2026))",
+    "retrieved": "2026-11-02"
+  },
+  "data_provenance": {
+    "record": {
+      "record": 545,
+      "title": "Datasets derived from the Run2011A SingleElectron, SingleMu, DoubleElectron, and DoubleMu primary datasets",
+      "record_url": "https://opendata.cern.ch/record/545",
+      "file": "Dimuon_DoubleMu.csv",
+      "url": "https://opendata.cern.ch/record/545/files/Dimuon_DoubleMu.csv",
+      "size": 13935840,
+      "adler32": "5b87a72a",
+      "license": "CC0-1.0",
+      "collision": "pp, sqrt(s) = 7 TeV, LHC Run2011A",
+      "producer_selection": "two muons |eta|<2.4, >=1 global, opposite charge, 0.3<M<300 GeV"
+    },
+    "file_check": {
+      "path": "data\\raw\\Dimuon_DoubleMu.csv",
+      "size": 13935840,
+      "adler32": "5b87a72a",
+      "size_ok": true,
+      "checksum_ok": true
+    },
+    "provenance": {
+      "record": 545,
+      "title": "Datasets derived from the Run2011A SingleElectron, SingleMu, DoubleElectron, and DoubleMu primary datasets",
+      "record_url": "https://opendata.cern.ch/record/545",
+      "file": "Dimuon_DoubleMu.csv",
+      "url": "https://opendata.cern.ch/record/545/files/Dimuon_DoubleMu.csv",
+      "size": 13935840,
+      "adler32": "5b87a72a",
+      "license": "CC0-1.0",
+      "collision": "pp, sqrt(s) = 7 TeV, LHC Run2011A",
+      "producer_selection": "two muons |eta|<2.4, >=1 global, opposite charge, 0.3<M<300 GeV",
+      "retrieved_utc": "2026-11-02",
+      "verified": {
+        "path": "data\\raw\\Dimuon_DoubleMu.csv",
+        "size": 13935840,
+        "adler32": "5b87a72a",
+        "size_ok": true,
+        "checksum_ok": true
+      }
+    },
+    "selection": {
+      "pt_min": 3.0,
+      "eta_max": 2.4,
+      "require_both_global": false,
+      "window": null
+    },
+    "cutflow": {
+      "validated events": 100000,
+      "both muons pT > 3.0 GeV": 93469,
+      "both muons |eta| < 2.4": 93469
+    }
+  },
+  "results": {
+    "comparison": {
+      "J/psi": {
+        "process": "J/psi",
+        "pdg_mass": 3.0969,
+        "data_mass": 3.0933108182716285,
+        "data_mass_err": 0.00048001957732644526,
+        "sim_mass": 3.09733942980455,
+        "sim_mass_err": 0.0001978506007145985,
+        "data_minus_pdg_MeV": -3.5891817283717486,
+        "sim_minus_pdg_MeV": 0.43942980454980685,
+        "data_fwhm_MeV": 62.01643722437744,
+        "sim_fwhm_MeV": 45.76123617618455,
+        "fwhm_ratio_sim_over_data": 0.7378888279347449,
+        "data_resolution_param_MeV": 26.336180237972414,
+        "sim_resolution_param_MeV": 19.433173168075655,
+        "data_signal": 6359.817153753564,
+        "data_signal_err": 106.1812914788557,
+        "data_background": 1029.1385490254559,
+        "data_fit_pvalue": 0.23857988828962295,
+        "sim_fit_pvalue": 0.9983486256227313,
+        "data_signal_model": "cb_gauss",
+        "sim_signal_model": "double_gauss",
+        "kinematics_chi2": {
+          "muon pT [GeV]": [
+            12397.138201162878,
+            26
+          ],
+          "muon eta": [
+            1538.7140570106208,
+            23
+          ]
+        },
+        "sim_cutflow": {
+          "generated": 1000000,
+          "both tracks reconstructable": 556110,
+          "both fits ok": 556110,
+          "opposite charge": 556110,
+          "both pass pT and |eta| cuts": 12184
+        },
+        "sim_acceptance": 0.012184,
+        "sim_seed": 20261102,
+        "sim_events_generated": 1000000,
+        "sim_mean_reco_minus_true_MeV": 0.5905401254611164,
+        "sim_mean_reco_minus_true_err_MeV": 0.20321523888435652
+      },
+      "Upsilon(1S)": {
+        "process": "Upsilon(1S)",
+        "pdg_mass": 9.4604,
+        "data_mass": 9.44390434179264,
+        "data_mass_err": 0.0030858390254586785,
+        "sim_mass": 9.46150388413484,
+        "sim_mass_err": 0.00026612029453384426,
+        "data_minus_pdg_MeV": -16.495658207359654,
+        "sim_minus_pdg_MeV": 1.103884134840527,
+        "data_fwhm_MeV": 214.19587106775495,
+        "sim_fwhm_MeV": 141.72222684715052,
+        "fwhm_ratio_sim_over_data": 0.6616477999350445,
+        "data_resolution_param_MeV": 90.96138570908568,
+        "sim_resolution_param_MeV": 60.18440073345954,
+        "data_signal": 3111.438628162688,
+        "data_signal_err": 200.0750843734276,
+        "data_background": 9913.706365599372,
+        "data_fit_pvalue": 0.23304133838491622,
+        "sim_fit_pvalue": 0.004248329570543023,
+        "data_signal_model": "double_gauss",
+        "sim_signal_model": "double_gauss",
+        "kinematics_chi2": {
+          "muon pT [GeV]": [
+            782.0268544168252,
+            25
+          ],
+          "muon eta": [
+            160.35247485917455,
+            23
+          ]
+        },
+        "sim_cutflow": {
+          "generated": 200000,
+          "both tracks reconstructable": 109026,
+          "both fits ok": 109026,
+          "opposite charge": 109026,
+          "both pass pT and |eta| cuts": 60637
+        },
+        "sim_acceptance": 0.303185,
+        "sim_seed": 20261103,
+        "sim_events_generated": 200000,
+        "sim_mean_reco_minus_true_MeV": 1.3615861718343394,
+        "sim_mean_reco_minus_true_err_MeV": 0.27211093702203143
+      },
+      "Z": {
+        "process": "Z",
+        "pdg_mass": 91.1879,
+        "data_mass": 90.94801431357496,
+        "data_mass_err": 0.03851542681188677,
+        "sim_mass": 91.18958708211501,
+        "sim_mass_err": 0.009137090909162373,
+        "data_minus_pdg_MeV": -239.8856864250405,
+        "sim_minus_pdg_MeV": 1.6870821150121174,
+        "data_fwhm_MeV": 4437.956734052065,
+        "sim_fwhm_MeV": 3523.4398161993286,
+        "fwhm_ratio_sim_over_data": 0.7939328901438524,
+        "data_resolution_param_MeV": 1106.9767816285942,
+        "sim_resolution_param_MeV": 787.8192495529524,
+        "data_signal": 5320.622218779376,
+        "data_signal_err": 82.18814786407674,
+        "data_background": 393.3607291632954,
+        "data_fit_pvalue": 0.3612111075458352,
+        "sim_fit_pvalue": 0.9607533584729394,
+        "data_signal_model": "rbw_cb",
+        "sim_signal_model": "rbw_gauss",
+        "kinematics_chi2": {
+          "muon pT [GeV]": [
+            681.7762430243383,
+            26
+          ],
+          "muon eta": [
+            392.1892444510507,
+            23
+          ]
+        },
+        "sim_cutflow": {
+          "generated": 100000,
+          "both tracks reconstructable": 65692,
+          "both fits ok": 65692,
+          "opposite charge": 65692,
+          "both pass pT and |eta| cuts": 56948
+        },
+        "sim_acceptance": 0.56948,
+        "sim_seed": 20261104,
+        "sim_events_generated": 100000,
+        "sim_mean_reco_minus_true_MeV": 13.445834087201735,
+        "sim_mean_reco_minus_true_err_MeV": 3.5418484375978485
+      }
+    },
+    "fit_validation": {
+      "J/psi": {
+        "n_toys": 100,
+        "failed": 0,
+        "pull_mean": -0.04282992855302102,
+        "pull_mean_err": 0.09455692017013671,
+        "pull_width": 0.9455692017013672
+      },
+      "Upsilon(1S)": {
+        "n_toys": 100,
+        "failed": 0,
+        "pull_mean": -0.041463979168196274,
+        "pull_mean_err": 0.093425120891996,
+        "pull_width": 0.93425120891996
+      },
+      "Z": {
+        "n_toys": 98,
+        "failed": 2,
+        "pull_mean": 0.14469621328616813,
+        "pull_mean_err": 0.09373666026041386,
+        "pull_width": 0.9279455936228549
+      }
+    }
+  },
+  "runtime_s": 441.9605920314789
+}
