@@ -1,0 +1,16 @@
+{
+  "seed": 20261102,
+  "events": {
+    "J/psi": 100000,
+    "Upsilon(1S)": 20000,
+    "Z": 20000
+  },
+  "detector": "cms_inspired",
+  "detector_overrides": {},
+  "resolution_scale": 1.0,
+  "material_scale": 1.0,
+  "pt_min": 3.0,
+  "eta_max": 2.4,
+  "toys": 10,
+  "output_dir": "outputs_quick"
+}

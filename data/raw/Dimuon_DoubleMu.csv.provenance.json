@@ -1,0 +1,20 @@
+{
+  "record": 545,
+  "title": "Datasets derived from the Run2011A SingleElectron, SingleMu, DoubleElectron, and DoubleMu primary datasets",
+  "record_url": "https://opendata.cern.ch/record/545",
+  "file": "Dimuon_DoubleMu.csv",
+  "url": "https://opendata.cern.ch/record/545/files/Dimuon_DoubleMu.csv",
+  "size": 13935840,
+  "adler32": "5b87a72a",
+  "license": "CC0-1.0",
+  "collision": "pp, sqrt(s) = 7 TeV, LHC Run2011A",
+  "producer_selection": "two muons |eta|<2.4, >=1 global, opposite charge, 0.3<M<300 GeV",
+  "retrieved_utc": "2026-11-02",
+  "verified": {
+    "path": "data\\raw\\Dimuon_DoubleMu.csv",
+    "size": 13935840,
+    "adler32": "5b87a72a",
+    "size_ok": true,
+    "checksum_ok": true
+  }
+}

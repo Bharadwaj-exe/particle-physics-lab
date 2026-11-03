@@ -1,0 +1,134 @@
+{
+  "J/psi": {
+    "process": "J/psi",
+    "pdg_mass": 3.0969,
+    "data_mass": 3.0933108182716285,
+    "data_mass_err": 0.00048001957732644526,
+    "sim_mass": 3.09733942980455,
+    "sim_mass_err": 0.0001978506007145985,
+    "data_minus_pdg_MeV": -3.5891817283717486,
+    "sim_minus_pdg_MeV": 0.43942980454980685,
+    "data_fwhm_MeV": 62.01643722437744,
+    "sim_fwhm_MeV": 45.76123617618455,
+    "fwhm_ratio_sim_over_data": 0.7378888279347449,
+    "data_resolution_param_MeV": 26.336180237972414,
+    "sim_resolution_param_MeV": 19.433173168075655,
+    "data_signal": 6359.817153753564,
+    "data_signal_err": 106.1812914788557,
+    "data_background": 1029.1385490254559,
+    "data_fit_pvalue": 0.23857988828962295,
+    "sim_fit_pvalue": 0.9983486256227313,
+    "data_signal_model": "cb_gauss",
+    "sim_signal_model": "double_gauss",
+    "kinematics_chi2": {
+      "muon pT [GeV]": [
+        12397.138201162878,
+        26
+      ],
+      "muon eta": [
+        1538.7140570106208,
+        23
+      ]
+    },
+    "sim_cutflow": {
+      "generated": 1000000,
+      "both tracks reconstructable": 556110,
+      "both fits ok": 556110,
+      "opposite charge": 556110,
+      "both pass pT and |eta| cuts": 12184
+    },
+    "sim_acceptance": 0.012184,
+    "sim_seed": 20261102,
+    "sim_events_generated": 1000000,
+    "sim_mean_reco_minus_true_MeV": 0.5905401254611164,
+    "sim_mean_reco_minus_true_err_MeV": 0.20321523888435652
+  },
+  "Upsilon(1S)": {
+    "process": "Upsilon(1S)",
+    "pdg_mass": 9.4604,
+    "data_mass": 9.44390434179264,
+    "data_mass_err": 0.0030858390254586785,
+    "sim_mass": 9.46150388413484,
+    "sim_mass_err": 0.00026612029453384426,
+    "data_minus_pdg_MeV": -16.495658207359654,
+    "sim_minus_pdg_MeV": 1.103884134840527,
+    "data_fwhm_MeV": 214.19587106775495,
+    "sim_fwhm_MeV": 141.72222684715052,
+    "fwhm_ratio_sim_over_data": 0.6616477999350445,
+    "data_resolution_param_MeV": 90.96138570908568,
+    "sim_resolution_param_MeV": 60.18440073345954,
+    "data_signal": 3111.438628162688,
+    "data_signal_err": 200.0750843734276,
+    "data_background": 9913.706365599372,
+    "data_fit_pvalue": 0.23304133838491622,
+    "sim_fit_pvalue": 0.004248329570543023,
+    "data_signal_model": "double_gauss",
+    "sim_signal_model": "double_gauss",
+    "kinematics_chi2": {
+      "muon pT [GeV]": [
+        782.0268544168252,
+        25
+      ],
+      "muon eta": [
+        160.35247485917455,
+        23
+      ]
+    },
+    "sim_cutflow": {
+      "generated": 200000,
+      "both tracks reconstructable": 109026,
+      "both fits ok": 109026,
+      "opposite charge": 109026,
+      "both pass pT and |eta| cuts": 60637
+    },
+    "sim_acceptance": 0.303185,
+    "sim_seed": 20261103,
+    "sim_events_generated": 200000,
+    "sim_mean_reco_minus_true_MeV": 1.3615861718343394,
+    "sim_mean_reco_minus_true_err_MeV": 0.27211093702203143
+  },
+  "Z": {
+    "process": "Z",
+    "pdg_mass": 91.1879,
+    "data_mass": 90.94801431357496,
+    "data_mass_err": 0.03851542681188677,
+    "sim_mass": 91.18958708211501,
+    "sim_mass_err": 0.009137090909162373,
+    "data_minus_pdg_MeV": -239.8856864250405,
+    "sim_minus_pdg_MeV": 1.6870821150121174,
+    "data_fwhm_MeV": 4437.956734052065,
+    "sim_fwhm_MeV": 3523.4398161993286,
+    "fwhm_ratio_sim_over_data": 0.7939328901438524,
+    "data_resolution_param_MeV": 1106.9767816285942,
+    "sim_resolution_param_MeV": 787.8192495529524,
+    "data_signal": 5320.622218779376,
+    "data_signal_err": 82.18814786407674,
+    "data_background": 393.3607291632954,
+    "data_fit_pvalue": 0.3612111075458352,
+    "sim_fit_pvalue": 0.9607533584729394,
+    "data_signal_model": "rbw_cb",
+    "sim_signal_model": "rbw_gauss",
+    "kinematics_chi2": {
+      "muon pT [GeV]": [
+        681.7762430243383,
+        26
+      ],
+      "muon eta": [
+        392.1892444510507,
+        23
+      ]
+    },
+    "sim_cutflow": {
+      "generated": 100000,
+      "both tracks reconstructable": 65692,
+      "both fits ok": 65692,
+      "opposite charge": 65692,
+      "both pass pT and |eta| cuts": 56948
+    },
+    "sim_acceptance": 0.56948,
+    "sim_seed": 20261104,
+    "sim_events_generated": 100000,
+    "sim_mean_reco_minus_true_MeV": 13.445834087201735,
+    "sim_mean_reco_minus_true_err_MeV": 3.5418484375978485
+  }
+}

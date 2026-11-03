@@ -1,0 +1,5 @@
+{
+  "validated events": 100000,
+  "both muons pT > 3.0 GeV": 93469,
+  "both muons |eta| < 2.4": 93469
+}
