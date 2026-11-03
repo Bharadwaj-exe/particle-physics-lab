@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import platform
 import subprocess
 import sys
@@ -53,15 +54,19 @@ class RunConfig:
 def _git():
     try:
         rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True, timeout=10)
-        dirty = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True, text=True, timeout=10)
-        return {"commit": rev.stdout.strip() or None, "dirty": bool(dirty.stdout.strip())}
+        st = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True, text=True, timeout=10)
+        # the run's own output folders are written before the record; they do not
+        # make the code state dirty
+        changed = [ln for ln in st.stdout.splitlines()
+                   if ln.strip() and not re.search(r"(^|/)outputs(_quick)?(/|$)", ln[3:].strip('"'))]
+        return {"commit": rev.stdout.strip() or None, "dirty": bool(changed), "changed_files": changed[:50]}
     except (OSError, subprocess.SubprocessError):
         return {"commit": None, "dirty": None}
 
 
 def environment() -> dict:
     vers = {}
-    for pkg in ("numpy", "scipy", "pandas", "matplotlib", "PySide6", "pyqtgraph"):
+    for pkg in ("numpy", "scipy", "pandas", "matplotlib", "PySide6", "pyqtgraph", "pyvista", "pyvistaqt", "vtk"):
         try:
             vers[pkg] = metadata.version(pkg)
         except metadata.PackageNotFoundError:

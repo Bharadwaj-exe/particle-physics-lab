@@ -1,17 +1,17 @@
 {
   "J/psi": {
-    "selected": 43,
-    "mean_reco_mass": 3.096973204846525,
-    "std_reco_mass": 0.021467832845789927
+    "selected": 44,
+    "mean_reco_mass": 3.098775406679494,
+    "std_reco_mass": 0.03173641514749281
   },
   "Upsilon(1S)": {
-    "selected": 1235,
-    "mean_reco_mass": 9.463722521291094,
-    "std_reco_mass": 0.0681187719210214
+    "selected": 1230,
+    "mean_reco_mass": 9.467907966387575,
+    "std_reco_mass": 0.10254917206639906
   },
   "Z": {
-    "selected": 2228,
-    "mean_reco_mass": 91.64111052215695,
-    "std_reco_mass": 4.78597659540651
+    "selected": 2229,
+    "mean_reco_mass": 91.64063848656048,
+    "std_reco_mass": 4.8560815781505084
   }
 }

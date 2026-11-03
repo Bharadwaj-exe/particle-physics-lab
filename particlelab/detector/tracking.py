@@ -51,7 +51,20 @@ def _wsolve(cols, rhs, w):
     """Batched weighted least squares: argmin Σ w (Σ_i x_i c_i − rhs)²."""
     M, wc = _normal(cols, w)
     v = np.stack([np.sum(c * rhs, 1) for c in wc], -1)
-    return np.linalg.solve(M, v[..., None])[..., 0], M
+    try:
+        return np.linalg.solve(M, v[..., None])[..., 0], M
+    except np.linalg.LinAlgError:
+        # a few stiff, very forward tracks (R ≫ lever arm) make the circle fit
+        # singular to machine precision; solve those in the least-squares sense
+        return (_pinv(M) @ v[..., None])[..., 0], M
+
+
+def _pinv(M):
+    """Batched inverse that falls back to the pseudo-inverse for singular matrices."""
+    try:
+        return np.linalg.inv(M)
+    except np.linalg.LinAlgError:
+        return np.linalg.pinv(M)
 
 
 def fit_tracks(h: Hits, det: DetectorConfig, iterations: int = 6) -> TrackFit:
@@ -86,7 +99,7 @@ def fit_tracks(h: Hits, det: DetectorConfig, iterations: int = 6) -> TrackFit:
     dx, dy = xs - a[:, None], ys - b[:, None]
     d = np.maximum(np.hypot(dx, dy), 1e-12)
     M, _ = _normal([-dx / d, -dy / d, -ones], w)
-    cov = np.linalg.inv(M)
+    cov = _pinv(M)
     res = d - R[:, None]
     ndf = np.maximum((w > 0).sum(1) - 3, 1)
     chi2 = np.sum(w * res**2, 1) / ndf

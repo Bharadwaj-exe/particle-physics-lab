@@ -116,3 +116,59 @@ def test_real_file_integrity_and_schema():
     d = cms.load()
     assert d.report.n_rows == 100000 and d.report.n_rejected == 0
     assert d.report.mass_check["max_abs_diff_GeV"] < 1e-3   # published M = recomputed M
+
+
+# --- audit A4: smooth line shapes, bounded fallback, separate status flags ------------
+
+def test_rbw_line_shapes_are_smooth_in_sigma():
+    """The convolution grid must not move with σ: second differences of the shape in σ
+    must be at the level of rounding, not of the grid spacing."""
+    m = np.linspace(75.0, 105.0, 301)
+    sig = 0.9 + 1e-5 * np.arange(41)
+    for fn in (lambda s: rbw_gauss(m, 91.19, s, 2.4955), lambda s: rbw_cb(m, 91.19, s, 1.2, 2.0, 2.4955)):
+        v = np.array([fn(s) for s in sig])
+        d2 = np.abs(np.diff(v, 2, axis=0)).max()
+        assert d2 < 1e-9 * np.abs(v).max()
+
+
+def test_fallback_minimisers_respect_parameter_bounds(rng, monkeypatch):
+    """Force the first L-BFGS-B call to stop early, so every fallback runs, and check
+    that no likelihood evaluation leaves the physical region (σ > 0, α > 0, n > 1)."""
+    from particlelab.analysis import fitting
+    from particlelab.physics.production import sample_mass
+    m = np.concatenate([sample_mass("Z", 1500, rng) + rng.normal(0, 1.2, 1500), 70 + rng.exponential(25, 150)])
+    m = m[(m > 70) & (m < 110)]
+    seen, calls = [], {"n": 0}
+    real_min, real_exp = fitting.optimize.minimize, fitting._Model.expected
+
+    def first_call_fails(fun, x0, **kw):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            kw = dict(kw, options=dict(kw.get("options", {}), maxiter=2))
+        return real_min(fun, x0, **kw)
+
+    def spy(self, x):
+        seen.append(np.array(x, float))
+        return real_exp(self, x)
+
+    monkeypatch.setattr(fitting.optimize, "minimize", first_call_fails)
+    monkeypatch.setattr(fitting._Model, "expected", spy)
+    f = fit_peak(m, "Z", signal="rbw_cb")
+    assert calls["n"] >= 2                                  # the fallback path ran
+    xs = np.array(seen)
+    names = f.names
+    for k in ("sigma", "alpha"):
+        assert (xs[:, names.index(k)] > 0).all()
+    assert (xs[:, names.index("n")] > 1).all()
+    assert np.isfinite(f.mass) and f.optimizer_ok
+    assert f.converged == (f.optimizer_ok and f.hessian_ok)
+
+
+@pytest.mark.skipif(not cms.available(), reason="CMS file not downloaded")
+def test_small_cms_z_subsample_fits_without_raising():
+    """The 1 305-event barrel–barrel Z subsample crashed the old unbounded fallback."""
+    from particlelab.analysis.compare import DATA_FIT
+    ev = cms.load(selection=cms.Selection(pt_min=3.0, eta_max=2.4)).events
+    bb = (ev["eta1_re"].abs() < 0.9) & (ev["eta2_re"].abs() < 0.9)
+    f = fit_peak(ev["M_recomputed"].to_numpy()[bb.to_numpy()], "Z", **DATA_FIT["Z"])
+    assert 90.0 < f.mass < 92.0 and f.optimizer_ok

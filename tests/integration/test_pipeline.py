@@ -56,3 +56,17 @@ def test_data_simulation_comparison_runs():
     assert abs(s["data_mass"] - 9.46) < 0.05 and s["data_fit_pvalue"] > 1e-3
     assert 0 < s["fwhm_ratio_sim_over_data"] < 2
     assert {k.variable for k in c.kinematics} == {"muon pT [GeV]", "muon eta"}
+
+
+def test_run_analysis_logging_survives_a_non_utf8_redirect():
+    """Audit A16: with output redirected to a cp1252 stream, logging μ or → must not raise."""
+    import os
+    import subprocess
+    import sys
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2]
+    env = dict(os.environ, PYTHONIOENCODING="cp1252", MPLBACKEND="Agg")
+    code = "import run_analysis as r; r._safe_stdout(); r.log('J/psi → μ⁺μ⁻ done')"
+    p = subprocess.run([sys.executable, "-c", code], cwd=root, env=env, capture_output=True)
+    assert p.returncode == 0, p.stderr.decode("cp1252", "replace")
+    assert b"J/psi" in p.stdout

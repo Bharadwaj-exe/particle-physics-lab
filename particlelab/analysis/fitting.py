@@ -43,6 +43,9 @@ class FitResult:
     at_bound: list = field(default_factory=list)
     _model: object = None
     extra_peaks: tuple = ()
+    optimizer_ok: bool = True      # the minimiser reported success
+    hessian_ok: bool = True        # the Hessian at the minimum is positive definite
+    optimizer_message: str = ""
 
     # compatibility / convenience ------------------------------------------------
     @property
@@ -99,6 +102,7 @@ class FitResult:
                 "mass": self.mass, "mass_err": self.mass_err, "width": self.sigma, "width_err": self.sigma_err,
                 "n_signal": self.n_signal, "n_signal_err": self.n_signal_err, "n_background": self.n_background,
                 "deviance": self.deviance, "ndf": self.ndf, "pvalue": self.pvalue, "converged": self.converged,
+                "optimizer_ok": self.optimizer_ok, "hessian_ok": self.hessian_ok,
                 "at_bound": self.at_bound, "window": list(self.window), "bins": self.bins,
                 "n_events": int(self.counts.sum())}
 
@@ -241,25 +245,48 @@ def fit_counts(counts, edges, name, signal=None, background="exp", init=None, ex
     x0 = np.clip(x0, [b[0] for b in bnds], [b[1] for b in bnds])
     n = np.asarray(counts, float)
 
+    lo_b = np.array([b[0] for b in bnds]); hi_b = np.array([b[1] for b in bnds])
+    BAD = 1e300
+
     def nll(x):
-        mu = np.maximum(model.expected(x), 1e-300)
-        return float(np.sum(mu - n * np.log(mu)))
+        # Every minimiser below respects the bounds; this guard only protects the
+        # Hessian steps and keeps a bad point from raising inside a minimiser.
+        try:
+            with np.errstate(all="ignore"):
+                mu = np.maximum(model.expected(x), 1e-300)
+                v = float(np.sum(mu - n * np.log(mu)))
+        except (ValueError, FloatingPointError, ZeroDivisionError):
+            return BAD
+        return v if np.isfinite(v) else BAD
 
     scale = np.array([max(abs(v), 1e-3) for v in x0])
     fs = lambda z: nll(z * scale)
-    res = optimize.minimize(fs, x0 / scale, method="L-BFGS-B",
-                            bounds=[(b[0] / s, b[1] / s) for b, s in zip(bnds, scale)],
-                            options={"maxiter": 5000, "ftol": 1e-11, "gtol": 1e-7})
-    z = res.x
-    if not res.success:
-        res2 = optimize.minimize(fs, res.x, method="Nelder-Mead",
-                                 options={"maxiter": 4000, "xatol": 1e-8, "fatol": 1e-8})
-        z = res2.x if res2.fun < res.fun else res.x
-    x = np.clip(z * scale, [b[0] for b in bnds], [b[1] for b in bnds])
+    sbnds = [(b[0] / s, b[1] / s) for b, s in zip(bnds, scale)]
+    lbfgs = dict(method="L-BFGS-B", bounds=sbnds, options={"maxiter": 5000, "ftol": 1e-11, "gtol": 1e-7})
+    res = optimize.minimize(fs, x0 / scale, **lbfgs)
+    best = res
+    # Fallbacks are all bounded: two L-BFGS-B restarts from the best point, then a
+    # bounded Nelder–Mead polish followed by a final L-BFGS-B step.
+    for _ in range(2):
+        if best.success:
+            break
+        r = optimize.minimize(fs, best.x, **lbfgs)
+        if r.fun <= best.fun:
+            best = r
+    if not best.success:
+        nm = optimize.minimize(fs, best.x, method="Nelder-Mead", bounds=sbnds,
+                               options={"maxiter": 4000, "xatol": 1e-8, "fatol": 1e-8})
+        r = optimize.minimize(fs, nm.x, **lbfgs)
+        for cand in (nm, r):
+            if cand.fun < best.fun or (cand.fun <= best.fun and cand.success):
+                best = cand
+    optimizer_ok = bool(best.success and best.fun < BAD)
+    message = str(best.message)
+    x = np.clip(best.x * scale, lo_b, hi_b)
     H = hessian(nll, x, scale * 1e-2)
     try:
         cov = np.linalg.inv(H)
-        posdef = np.all(np.linalg.eigvalsh(H) > 0)
+        posdef = bool(np.all(np.isfinite(H)) and np.all(np.linalg.eigvalsh(H) > 0))
     except np.linalg.LinAlgError:
         cov, posdef = np.full_like(H, np.nan), False
     err = np.sqrt(np.abs(np.diag(cov)))
@@ -269,7 +296,8 @@ def fit_counts(counts, edges, name, signal=None, background="exp", init=None, ex
     ndf = int(max(bins - len(names), 1))
     return FitResult(name, signal, background, dict(zip(names, map(float, x))), dict(zip(names, map(float, err))),
                      cov, names, nll(x), dev, ndf, float(stats.chi2.sf(dev, ndf)), (edges[0], edges[-1]), bins,
-                     edges, n, bool(posdef and res.success or posdef), at_bound, model, tuple(extra_peaks))
+                     edges, n, bool(posdef and optimizer_ok), at_bound, model, tuple(extra_peaks),
+                     optimizer_ok, posdef, message)
 
 
 def fit_peak(masses, name, bins=80, window=None, background=True, signal=None, init=None,

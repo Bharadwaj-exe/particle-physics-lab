@@ -56,3 +56,17 @@ The 2D displays were kept and now draw the same `DisplayEvent` as the 3D view.
 
 **ADR-15 · Hit residual magnification (display only).** Smearing (10–45 µm) and multiple-scattering offsets (up to millimetres) are invisible at metre scale. The 3D view can draw each hit at true crossing + k × (measured − true crossing), with k = 10, 100 or 1000, plus a connecting segment. The scene text states when this is active. The simulation data are never altered.
 
+
+**ADR-16 · Material calibrated to the published CMS X₀(η); Highland applied to the combined thickness.** The independent audit found the forward material 2–2.5× too low and the per-layer Highland logarithm about 10 % too small (`validation/FINAL_INDEPENDENT_AUDIT.md`, F-DET-3, F-DET-4).
+- Passive surfaces (beam pipe, flanges, service cylinders) now scatter the muon without recording hits. They are kept in a separate `DetectorConfig.passive` tuple, so the sensitive-layer lists, displays and hit counts are unchanged.
+- All thicknesses are fitted subsystem by subsystem to the CMS curve (JINST 9 (2014) P10009, Fig. 2), digitised with its method recorded in `references/`. The fit (`calibration/fit_material.py`) never sees the dimuon data or the resolution.
+- The PDG says per-layer θ₀ values added in quadrature are "systematically too small". The logarithm now uses the total thickness along each track, and each surface gets its share of θ₀².
+- Result: the single-muon resolution at 10 GeV is within ±15 % of CMS at all η (before: 0.5–0.95 of CMS). The fixed-seed regression baseline was regenerated for this change: for 4 000 generated Υ(1S), the reconstructed mass spread went from 68 to 103 MeV.
+
+**ADR-17 · Smooth Breit–Wigner convolution and bounded fit fallbacks.** The numerical RBW ⊗ resolution convolution used a grid whose step and edges moved with σ, so −ln L jittered by about 0.1 as σ changed. This defeated the minimiser's convergence test and made the numerical Hessian noisy. The old unbounded Nelder–Mead fallback then wandered to σ < 0 on a small CMS subsample and crashed (audit F-STA-3).
+- The grid nodes now sit at multiples of a power-of-two step, and the Crystal Ball tail is cut at a fixed 30 GeV. The convolution uses an FFT, which made it about 26× faster.
+- Every fallback respects the bounds: two L-BFGS-B restarts, then a bounded Nelder–Mead and a final L-BFGS-B step. The likelihood returns a large finite value instead of raising.
+- `FitResult` reports `optimizer_ok` and `hessian_ok` separately; `converged` requires both. Before, it only checked the Hessian.
+- Effect on the published Z data fit (BW ⊗ CB): the mass moved from 90.948 to 90.915 GeV (within its error). Its statistical error went from ±39 to ±76 MeV, because the old value came from the noisy Hessian.
+
+**ADR-18 · Systematic uncertainties on the data masses.** `analysis/systematics.py` refits the data with the fit window, binning and signal model varied one at a time. A variation is used only if the minimiser converged and p > 0.01. A Hessian that is not positive definite is allowed, because the CB-type tail parameters have nearly flat directions that do not affect the mass. The largest accepted shift in each category is taken, and the categories are added in quadrature. Masses are also fitted for three detector regions (both muons central, one central, neither). Window variations change the sample, so the estimate is conservative.

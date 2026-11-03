@@ -6,6 +6,7 @@ the fit window is done numerically by the fitter, so these need not be normalise
 from __future__ import annotations
 
 import numpy as np
+from scipy.signal import fftconvolve
 from scipy.special import voigt_profile
 
 from ..physics.production import rbw_pdf_unnorm
@@ -54,31 +55,47 @@ def _convolve_rbw(m, mu, width, kernel_fn, left, right, step):
 
     The kernel is sampled on offsets k·step, k = −K_left … K_right, so offset 0 sits
     exactly on a grid point and the convolution introduces no shift.
+
+    The grid nodes sit at integer multiples of ``step`` and the extents do not depend
+    on the fit parameters, so the result is a smooth function of μ and σ. (A grid that
+    moved with σ made −ln L jitter at the 10⁻¹ level, which broke the minimiser's
+    convergence test and the numerical Hessian.)
     """
     m = np.asarray(m, float)
     kl, kr = int(np.ceil(left / step)), int(np.ceil(right / step))
     offs = step * np.arange(-kl, kr + 1)
     kern = kernel_fn(offs)
     kern = kern / kern.sum()
-    lo, hi = m.min() - right - 1.0, m.max() + left + 1.0
-    grid = lo + step * np.arange(int(np.ceil((hi - lo) / step)) + 1)
+    i_lo = int(np.floor((m.min() - right - 1.0) / step))
+    i_hi = int(np.ceil((m.max() + left + 1.0) / step))
+    grid = step * np.arange(i_lo, i_hi + 1)
     f = rbw_pdf_unnorm(np.maximum(grid, 1e-6), mu, width)
     # g(m_i) = Σ_k f(m_i − offs_k) K(offs_k); with full convolution index i + kl
-    conv = np.convolve(f, kern, mode="full")[kl:kl + grid.size]
+    conv = fftconvolve(f, kern, mode="full")[kl:kl + grid.size]
     return np.interp(m, grid, conv)
+
+
+def _step(sigma, width):
+    """Grid step: at least 20 points per min(σ, Γ), rounded down to a power of two so
+    that it only changes when σ crosses a factor-of-two boundary."""
+    return float(2.0 ** np.floor(np.log2(min(sigma, width) / 20)))
+
+
+_CB_TAIL = 30.0   # GeV; covers the whole Z fit window below the peak
 
 
 def rbw_gauss(m, mu, sigma, width):
     """Relativistic s-dependent-width Breit–Wigner ⊗ Gaussian."""
-    step = min(sigma, width) / 20
-    return _convolve_rbw(m, mu, width, lambda x: np.exp(-0.5 * (x / sigma) ** 2), 8 * sigma, 8 * sigma, step)
+    # the Gaussian is below 1e-14 beyond 8σ, so the σ-dependent cut is negligible
+    return _convolve_rbw(m, mu, width, lambda x: np.exp(-0.5 * (x / sigma) ** 2), 8 * sigma, 8 * sigma,
+                         _step(sigma, width))
 
 
 def rbw_cb(m, mu, sigma, alpha, n, width):
     """Relativistic Breit–Wigner ⊗ Crystal Ball (the CB tail absorbs final-state radiation)."""
-    step = min(sigma, width) / 20
-    tail = min(max(8 * sigma, 10 * sigma * n / alpha), 15.0)
-    return _convolve_rbw(m, mu, width, lambda x: crystal_ball(x, 0.0, sigma, alpha, n), tail, 8 * sigma, step)
+    # the power-law tail is not negligible at any fixed number of σ, so its cut is fixed
+    return _convolve_rbw(m, mu, width, lambda x: crystal_ball(x, 0.0, sigma, alpha, n), _CB_TAIL, 8 * sigma,
+                         _step(sigma, width))
 
 
 def exponential(m, lam, lo):

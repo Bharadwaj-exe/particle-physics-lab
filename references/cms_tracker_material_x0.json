@@ -1,0 +1,295 @@
+{
+ "quantity": "total thickness t/X0 of CMS tracker material traversed by a straight track from the nominal interaction point, versus |eta|",
+ "source": "CMS Collaboration, 'Description and performance of track and primary-vertex reconstruction with the CMS tracker', JINST 9 (2014) P10009, arXiv:1405.6569, Figure 2 (left), 'CMS simulation'; the paper states the simulated material agrees with data to better than 10 %",
+ "detector": "Phase-0 CMS tracker (2010-2016 geometry, the one that recorded the 2011 data)",
+ "method": "page rendered at 300 dpi with PyMuPDF; y axis calibrated on the 0-2.5 tick marks (250 px per X0); for each 0.1 bin in |eta| the top edge of each coloured band was located column by column (9 columns per side) and the median of the +eta and -eta sides taken. The bands are stacked: each 'cumulative' value is the top of that band. Reading uncertainty about +-0.03 X0.",
+ "cross_check": "arXiv:1502.02701 (same tracker): about 0.4 X0 near eta = 0, 2.0 X0 near |eta| = 1.4, 1.4 X0 near |eta| = 2.5",
+ "bins": [
+  {
+   "eta": 0.05,
+   "cumulative": {
+    "pixel_and_beampipe": 0.068,
+    "tib_tid": 0.22,
+    "tob": 0.344,
+    "tec": 0.344,
+    "support_tube": 0.384
+   },
+   "total": 0.384
+  },
+  {
+   "eta": 0.15,
+   "cumulative": {
+    "pixel_and_beampipe": 0.068,
+    "tib_tid": 0.232,
+    "tob": 0.368,
+    "tec": 0.368,
+    "support_tube": 0.408
+   },
+   "total": 0.408
+  },
+  {
+   "eta": 0.25,
+   "cumulative": {
+    "pixel_and_beampipe": 0.068,
+    "tib_tid": 0.244,
+    "tob": 0.468,
+    "tec": 0.468,
+    "support_tube": 0.562
+   },
+   "total": 0.544
+  },
+  {
+   "eta": 0.35,
+   "cumulative": {
+    "pixel_and_beampipe": 0.072,
+    "tib_tid": 0.28,
+    "tob": 0.556,
+    "tec": 0.556,
+    "support_tube": 0.602
+   },
+   "total": 0.6
+  },
+  {
+   "eta": 0.45,
+   "cumulative": {
+    "pixel_and_beampipe": 0.076,
+    "tib_tid": 0.276,
+    "tob": 0.57,
+    "tec": 0.57,
+    "support_tube": 0.624
+   },
+   "total": 0.622
+  },
+  {
+   "eta": 0.55,
+   "cumulative": {
+    "pixel_and_beampipe": 0.08,
+    "tib_tid": 0.304,
+    "tob": 0.6,
+    "tec": 0.6,
+    "support_tube": 0.654
+   },
+   "total": 0.654
+  },
+  {
+   "eta": 0.65,
+   "cumulative": {
+    "pixel_and_beampipe": 0.084,
+    "tib_tid": 0.306,
+    "tob": 0.632,
+    "tec": 0.632,
+    "support_tube": 0.684
+   },
+   "total": 0.68
+  },
+  {
+   "eta": 0.75,
+   "cumulative": {
+    "pixel_and_beampipe": 0.096,
+    "tib_tid": 0.344,
+    "tob": 0.688,
+    "tec": 0.688,
+    "support_tube": 0.74
+   },
+   "total": 0.74
+  },
+  {
+   "eta": 0.85,
+   "cumulative": {
+    "pixel_and_beampipe": 0.1,
+    "tib_tid": 0.396,
+    "tob": 0.834,
+    "tec": 0.834,
+    "support_tube": 0.934
+   },
+   "total": 0.86
+  },
+  {
+   "eta": 0.95,
+   "cumulative": {
+    "pixel_and_beampipe": 0.104,
+    "tib_tid": 0.55,
+    "tob": 1.106,
+    "tec": 1.156,
+    "support_tube": 1.202
+   },
+   "total": 1.142
+  },
+  {
+   "eta": 1.05,
+   "cumulative": {
+    "pixel_and_beampipe": 0.12,
+    "tib_tid": 0.726,
+    "tob": 1.186,
+    "tec": 1.304,
+    "support_tube": 1.424
+   },
+   "total": 1.358
+  },
+  {
+   "eta": 1.15,
+   "cumulative": {
+    "pixel_and_beampipe": 0.132,
+    "tib_tid": 1.02,
+    "tob": 1.384,
+    "tec": 1.644,
+    "support_tube": 1.72
+   },
+   "total": 1.72
+  },
+  {
+   "eta": 1.25,
+   "cumulative": {
+    "pixel_and_beampipe": 0.202,
+    "tib_tid": 1.122,
+    "tob": 1.408,
+    "tec": 1.696,
+    "support_tube": 1.848
+   },
+   "total": 1.804
+  },
+  {
+   "eta": 1.35,
+   "cumulative": {
+    "pixel_and_beampipe": 0.274,
+    "tib_tid": 1.144,
+    "tob": 1.356,
+    "tec": 1.78,
+    "support_tube": 1.912
+   },
+   "total": 1.868
+  },
+  {
+   "eta": 1.45,
+   "cumulative": {
+    "pixel_and_beampipe": 0.296,
+    "tib_tid": 1.148,
+    "tob": 1.216,
+    "tec": 1.762,
+    "support_tube": 1.86
+   },
+   "total": 1.858
+  },
+  {
+   "eta": 1.55,
+   "cumulative": {
+    "pixel_and_beampipe": 0.348,
+    "tib_tid": 1.14,
+    "tob": 1.208,
+    "tec": 1.828,
+    "support_tube": 1.884
+   },
+   "total": 1.882
+  },
+  {
+   "eta": 1.65,
+   "cumulative": {
+    "pixel_and_beampipe": 0.4,
+    "tib_tid": 0.876,
+    "tob": 1.028,
+    "tec": 1.524,
+    "support_tube": 1.674
+   },
+   "total": 1.63
+  },
+  {
+   "eta": 1.75,
+   "cumulative": {
+    "pixel_and_beampipe": 0.438,
+    "tib_tid": 0.866,
+    "tob": 0.866,
+    "tec": 1.39,
+    "support_tube": 1.596
+   },
+   "total": 1.58
+  },
+  {
+   "eta": 1.85,
+   "cumulative": {
+    "pixel_and_beampipe": 0.406,
+    "tib_tid": 0.788,
+    "tob": 0.788,
+    "tec": 1.288,
+    "support_tube": 1.776
+   },
+   "total": 1.776
+  },
+  {
+   "eta": 1.95,
+   "cumulative": {
+    "pixel_and_beampipe": 0.468,
+    "tib_tid": 0.656,
+    "tob": 0.656,
+    "tec": 1.16,
+    "support_tube": 1.634
+   },
+   "total": 1.634
+  },
+  {
+   "eta": 2.05,
+   "cumulative": {
+    "pixel_and_beampipe": 0.544,
+    "tib_tid": 0.712,
+    "tob": 0.712,
+    "tec": 1.244,
+    "support_tube": 1.594
+   },
+   "total": 1.594
+  },
+  {
+   "eta": 2.15,
+   "cumulative": {
+    "pixel_and_beampipe": 0.47,
+    "tib_tid": 0.598,
+    "tob": 0.598,
+    "tec": 1.078,
+    "support_tube": 1.316
+   },
+   "total": 1.316
+  },
+  {
+   "eta": 2.25,
+   "cumulative": {
+    "pixel_and_beampipe": 0.496,
+    "tib_tid": 0.612,
+    "tob": 0.612,
+    "tec": 1.044,
+    "support_tube": 1.356
+   },
+   "total": 1.356
+  },
+  {
+   "eta": 2.35,
+   "cumulative": {
+    "pixel_and_beampipe": 0.528,
+    "tib_tid": 0.572,
+    "tob": 0.572,
+    "tec": 0.888,
+    "support_tube": 1.188
+   },
+   "total": 1.188
+  },
+  {
+   "eta": 2.45,
+   "cumulative": {
+    "pixel_and_beampipe": 0.594,
+    "tib_tid": 0.594,
+    "tob": 0.594,
+    "tec": 1.018,
+    "support_tube": 1.314
+   },
+   "total": 1.314
+  },
+  {
+   "eta": 2.55,
+   "cumulative": {
+    "pixel_and_beampipe": 0.656,
+    "tib_tid": 0.656,
+    "tob": 0.656,
+    "tec": 1.016,
+    "support_tube": 1.3
+   },
+   "total": 1.3
+  }
+ ]
+}

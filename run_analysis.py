@@ -9,6 +9,7 @@ Markdown report to the configured output directory.
 from __future__ import annotations
 
 import argparse
+import sys
 import csv
 import time
 from pathlib import Path
@@ -23,7 +24,8 @@ from particlelab.domain.particles import load as load_particles, RESONANCES
 from particlelab.detector import uniform_barrel, gluckstern, simulate_hits, fit_tracks
 from particlelab.detector.simulation import helix_at
 from particlelab.analysis import simulate, toy_study
-from particlelab.analysis.compare import compare, SIM_FIT
+from particlelab.analysis.compare import compare, SIM_FIT, DATA_FIT
+from particlelab.analysis.systematics import mass_systematics, masses_by_region
 from particlelab.analysis.studies import resolution_curve, pt_resolution
 from particlelab.analysis.fitting import fit_peak
 from particlelab.data import cms
@@ -36,6 +38,14 @@ LABEL = {k: load_particles().get(k).label for k in RESONANCES}
 
 def log(*a):
     print(time.strftime("%H:%M:%S"), *a, flush=True)
+
+
+def _safe_stdout():
+    """Redirected output on Windows uses the ANSI code page, which cannot encode
+    characters such as μ; replace them instead of crashing at the end of a run."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="replace")
 
 
 def savefig(fig, outdir, name, pdf=False):
@@ -166,6 +176,45 @@ def resolution_figures(det, figdir, rng, n=8000):
     return res, scans
 
 
+def cms_reference_figures(det, figdir, rng, n=8000):
+    """Model against the digitised CMS references (JINST 9 (2014) P10009): material
+    budget X0(η) (Fig. 2) and single-muon σ(pT)/pT versus η (Fig. 14). The CMS tracks
+    are unconstrained, so the beam-spot point is switched off for this comparison."""
+    import json as _json
+    from particlelab.detector import material_along
+    ref_x0 = _json.loads((ROOT / "references" / "cms_tracker_material_x0.json").read_text(encoding="utf-8"))
+    ref_pt = _json.loads((ROOT / "references" / "cms_muon_pt_resolution.json").read_text(encoding="utf-8"))["pt_GeV"]
+    eta = np.array([b["eta"] for b in ref_x0["bins"]])
+    cms_x0 = np.array([b["cumulative"]["tec"] for b in ref_x0["bins"]])
+    by_sub = [material_along(det, e) for e in eta]
+    model_x0 = np.array([sum(d.values()) for d in by_sub])
+    fig, ax = plt.subplots(1, 2, figsize=(13, 5))
+    bottom = np.zeros_like(eta)
+    for k in ("beam pipe", "pixel", "TIB/TID", "TOB", "TEC"):
+        v = np.array([d[k] for d in by_sub])
+        ax[0].bar(eta, v, 0.1, bottom=bottom, label=f"model: {k}", alpha=0.8)
+        bottom += v
+    ax[0].step(eta, cms_x0, where="mid", color="k", lw=2, label="CMS (tracker, without support tube)")
+    ax[0].set(xlabel="|η|", ylabel="x/X0", title="Material budget: model vs CMS")
+    ax[0].legend(fontsize=7)
+    det0 = det.with_(beamspot_constraint=0.0)
+    etas = np.round(np.arange(0.05, 2.5, 0.2), 2)
+    comp = {"material": {"eta": eta, "cms": cms_x0, "model": model_x0}, "resolution": {}}
+    for (pt, col) in ((1, "k"), (10, "C0"), (100, "C3")):
+        model = np.array([100 * pt_resolution(det0, float(pt), float(e), n, rng)[1] for e in etas])
+        ref = ref_pt[str(pt)]
+        re = np.array([float(k) for k in ref]); rv = np.array(list(ref.values()))
+        ax[1].plot(re, rv, "o", color=col, mfc="none", label=f"CMS, pT = {pt} GeV")
+        ax[1].plot(etas, model, "-", color=col, label=f"model, pT = {pt} GeV")
+        comp["resolution"][str(pt)] = {"eta": etas, "model_pct": model,
+                                       "cms_pct": [ref.get(f"{e:.2f}") for e in etas]}
+    ax[1].set(yscale="log", xlabel="|η|", ylabel="σ(pT)/pT [%] (68 % half-width)",
+              title="Single-muon resolution: model (no beam-spot point) vs CMS")
+    ax[1].legend(fontsize=7, ncol=2)
+    savefig(fig, figdir, "cms_reference_comparison", pdf=True)
+    return comp
+
+
 def event_display(det, figdir, rng):
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(15, 6.5), gridspec_kw={"width_ratios": [1, 1.6]})
     t = np.linspace(0, 2 * np.pi, 300)
@@ -225,6 +274,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=str(ROOT / "configs" / "default.json"))
     args = ap.parse_args()
+    _safe_stdout()
     cfg = RunConfig.load(args.config)
     out = ROOT / cfg.output_dir
     figdir = out / "figures"
@@ -267,9 +317,19 @@ def main():
     mass_comparison_figure(comps, figdir)
     kinematics_figure(comps, figdir)
 
+    # systematic uncertainties of the data masses, and masses by detector region
+    m_data = data.events["M_recomputed"].to_numpy()
+    for name in RESONANCES:
+        log(f"mass systematics {name} …")
+        syst = mass_systematics(name, m_data, DATA_FIT[name])
+        results[name]["data_mass_syst_MeV"] = syst.total_MeV
+        results[name]["data_mass_systematics"] = syst.summary()
+        results[name]["data_mass_by_region"] = masses_by_region(name, data.events, DATA_FIT[name])
+
     # detector studies
     log("resolution studies …")
     res, scans = resolution_figures(det, figdir, rng)
+    cms_ref = cms_reference_figures(det, figdir, rng)
     event_display(det, figdir, rng)
 
     # fit validation with toys (simulation-fit models)
@@ -283,7 +343,7 @@ def main():
 
     # tables
     save_json(results, out / "results.json")
-    keys = ["process", "pdg_mass", "data_mass", "data_mass_err", "sim_mass", "sim_mass_err", "data_minus_pdg_MeV",
+    keys = ["process", "pdg_mass", "data_mass", "data_mass_err", "data_mass_syst_MeV", "sim_mass", "sim_mass_err", "data_minus_pdg_MeV",
             "sim_minus_pdg_MeV", "data_fwhm_MeV", "sim_fwhm_MeV", "fwhm_ratio_sim_over_data", "data_signal",
             "data_background", "data_fit_pvalue", "sim_fit_pvalue", "sim_acceptance"]
     with open(out / "results.csv", "w", newline="", encoding="utf-8") as f:
@@ -293,7 +353,7 @@ def main():
             w.writerow(r)
     toy_summary = {k: {"n_toys": len(t.pulls), "failed": t.n_failed, "pull_mean": t.pull_mean,
                        "pull_mean_err": t.pull_mean_err, "pull_width": t.pull_std} for k, t in toys.items()}
-    save_json({"resolution": res, "scans": scans}, out / "detector_studies.json")
+    save_json({"resolution": res, "scans": scans, "cms_reference_comparison": cms_ref}, out / "detector_studies.json")
     save_json(toy_summary, out / "fit_validation.json")
     prov = cms.PROVENANCE_FILE.read_text(encoding="utf-8") if cms.PROVENANCE_FILE.exists() else None
     import json as _json
@@ -304,7 +364,7 @@ def main():
                      extra={"runtime_s": time.time() - t0})
     save_json(rec, out / "run_record.json")
     write_report(out, results, toy_summary, data, det, cfg)
-    log(f"done in {time.time() - t0:.0f} s → {out}")
+    log(f"done in {time.time() - t0:.0f} s -> {out}")
 
 
 def write_report(out, results, toys, data, det, cfg):
@@ -320,9 +380,30 @@ def write_report(out, results, toys, data, det, cfg):
          "| | PDG M (GeV) | data M (GeV) | sim M (GeV) | data FWHM (MeV) | sim FWHM (MeV) | sim/data FWHM | data signal | data fit p |",
          "|---|---|---|---|---|---|---|---|---|"]
     for r in results.values():
-        L.append(f"| {r['process']} | {r['pdg_mass']:.4f} | {r['data_mass']:.4f} ± {r['data_mass_err']:.4f} | "
+        L.append(f"| {r['process']} | {r['pdg_mass']:.4f} | {r['data_mass']:.4f} ± {r['data_mass_err']:.4f} (stat) "
+                 f"± {r['data_mass_syst_MeV'] / 1000:.4f} (syst) | "
                  f"{r['sim_mass']:.4f} ± {r['sim_mass_err']:.4f} | {r['data_fwhm_MeV']:.0f} | {r['sim_fwhm_MeV']:.0f} | "
                  f"{r['fwhm_ratio_sim_over_data']:.2f} | {r['data_signal']:.0f} ± {r['data_signal_err']:.0f} | {r['data_fit_pvalue']:.2f} |")
+    L += ["", "## Systematic uncertainty of the data masses", "",
+          "Each row refits the data with one fit choice changed. A variation counts only if the minimiser "
+          "converged and p > 0.01; the largest accepted shift per category is used, and categories are added "
+          "in quadrature.", "", "| | variation | shift (MeV) | p | used |", "|---|---|---|---|---|"]
+    for r in results.values():
+        sy = r["data_mass_systematics"]
+        for v in sy["variations"]:
+            L.append(f"| {r['process']} | {v['label']} | {v['shift_MeV']:+.2f} | {v['pvalue']:.3g} | "
+                     f"{'yes' if v['accepted'] else 'no'}{(' — ' + v['note']) if v['note'] else ''} |")
+        cats = ", ".join(f"{k} {v:.2f}" for k, v in sy["syst_by_category_MeV"].items())
+        L.append(f"| {r['process']} | **total** ({cats}) | ±{sy['syst_total_MeV']:.2f} | | stat ±{sy['stat_err_MeV']:.2f} |")
+    L += ["", "## Data masses by detector region (statistical errors only)", "",
+          "| | region | events in window | M (GeV) | offset from PDG | fit p | error matrix OK |", "|---|---|---|---|---|---|---|"]
+    for r in results.values():
+        for k, v in r["data_mass_by_region"].items():
+            if "mass" not in v:
+                L.append(f"| {r['process']} | {k} | {v.get('n_events', '')} | {v.get('note', '')} | | | |")
+                continue
+            L.append(f"| {r['process']} | {k} | {v['n_events_window']} | {v['mass']:.4f} ± {v['mass_err']:.4f} | "
+                     f"{v['offset_from_pdg_pct']:+.3f} % | {v['pvalue']:.3g} | {'yes' if v['hessian_ok'] else 'no'} |")
     L += ["", "## Simulation cut flow", ""]
     for r in results.values():
         L.append(f"- {r['process']}: " + ", ".join(f"{k}: {v}" for k, v in r["sim_cutflow"].items()))

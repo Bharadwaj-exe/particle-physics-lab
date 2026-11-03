@@ -44,6 +44,16 @@ RAW_FILE = DATA_DIR / "raw" / RECORD["file"]
 PROVENANCE_FILE = DATA_DIR / "raw" / (RECORD["file"] + ".provenance.json")
 
 
+def _display_path(path) -> str:
+    """Path relative to the project folder when possible, so that records and reports
+    do not contain machine-specific absolute paths."""
+    p = Path(path).resolve()
+    try:
+        return p.relative_to(DATA_DIR.parent).as_posix()
+    except ValueError:
+        return str(p)
+
+
 class SchemaError(ValueError):
     pass
 
@@ -60,7 +70,7 @@ def verify(path: Path = RAW_FILE) -> dict:
     path = Path(path)
     size = path.stat().st_size
     chk = adler32(path)
-    return {"path": str(path), "size": size, "adler32": chk,
+    return {"path": _display_path(path), "size": size, "adler32": chk,
             "size_ok": size == RECORD["size"], "checksum_ok": chk == RECORD["adler32"]}
 
 
@@ -215,7 +225,7 @@ class CMSDataset:
 def load(path: Path = RAW_FILE, selection: Selection = Selection(), check_file: bool = True) -> CMSDataset:
     path = Path(path)
     df = load_raw(path)
-    valid, rejected, report = validate(df, str(path))
+    valid, rejected, report = validate(df, _display_path(path))
     if check_file:
         report.file_check = verify(path)
     events, flow = select(valid, selection)
