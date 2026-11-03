@@ -25,6 +25,7 @@ from ..data import cms
 from ..physics import generate, boost, decay_rest
 from ..provenance import run_record, save_json
 from ..visualization.event_display import make_event, detector_geometry, momentum_arrow
+from ..education import from_display_event, gate
 from ..units import C_TRACK, um
 
 pg.setConfigOptions(antialias=True, background="w", foreground="k")
@@ -114,11 +115,27 @@ class SetupPanel(QtWidgets.QGroupBox):
         self.smear = QtWidgets.QCheckBox("hit smearing"); self.smear.setChecked(True)
         self.ptmin = QtWidgets.QDoubleSpinBox(); self.ptmin.setRange(0.5, 50); self.ptmin.setValue(3.0); self.ptmin.setSuffix(" GeV")
         self.etamax = QtWidgets.QDoubleSpinBox(); self.etamax.setRange(0.1, 2.5); self.etamax.setValue(2.4)
+        self.gate_label = QtWidgets.QLabel(); self.gate_label.setWordWrap(True)
+        self.gate_label.setStyleSheet("color:#080; font-size: 9pt;")
+        self.proc.currentIndexChanged.connect(self._update_gate)
+        self._update_gate()
         for lab, w in [("Process", self.proc), ("Generated events", self.n), ("Random seed", self.seed),
                        ("Detector", self.preset), ("Magnetic field", self.B), ("Hit-resolution scale", self.res),
                        ("Material scale", self.mat), ("Hit efficiency", self.eff), ("", self.ms), ("", self.smear),
                        ("Muon pT >", self.ptmin), ("Muon |η| <", self.etamax)]:
             f.addRow(lab, w)
+        f.insertRow(1, self.gate_label)          # full width under the process choice
+
+    def _update_gate(self):
+        g = gate(f"{self.proc.currentData()} -> mu+ mu-")
+        self.gate_label.setText(("✓ " if g.simulable else "✗ ") + g.message)
+        self.gate_label.setStyleSheet(f"color:{'#080' if g.simulable else '#b00'}; font-size: 9pt;")
+
+    def select_process(self, key: str) -> bool:
+        i = self.proc.findData(key)
+        if i >= 0:
+            self.proc.setCurrentIndex(i)
+        return i >= 0
 
     def detector(self) -> DetectorConfig:
         base = cms_inspired() if self.preset.currentIndex() == 0 else uniform_barrel()
@@ -184,6 +201,10 @@ class MassTab(QtWidgets.QWidget):
 
     def run(self):
         s = self.main.setup.settings()
+        g = gate(f"{s['process']} -> mu+ mu-")
+        if not g.simulable:            # the generator only ever receives a checked process
+            QtWidgets.QMessageBox.warning(self, "Process not simulated", g.message)
+            return
         data = None
         if self.overlay.isChecked():
             data = self.main.data_masses()
@@ -331,6 +352,113 @@ def event_info_lines(ev) -> list:
 
 TRACK_COLORS = {"μ⁻": "#1f77b4", "μ⁺": "#d62728"}
 
+DIAGRAM_VS_TRACKS = (
+    "<b>Diagram ≠ picture of the event.</b> The diagram's lines stand for particles in the interaction "
+    "amplitude, not for paths, and left-to-right is not a distance in the detector. The Z/γ* (or the "
+    "quarkonium) decays about 10⁻¹⁶ m from the collision point and never reaches the detector: its mass is "
+    "<i>inferred</i> from the two muons. The curves on the left are measured trajectories, helices of radius "
+    "R = pT / (0.3 B), fitted to the recorded hits.")
+
+
+class ReconstructTab(QtWidgets.QWidget):
+    """The learner reconstructs the pair mass of the displayed event by hand."""
+    def __init__(self, main):
+        super().__init__()
+        self.main = main
+        self.ex = None
+        self.my_masses = []
+        intro = QtWidgets.QLabel(
+            "Reconstruct the μ⁺μ⁻ mass of the event shown in the event displays yourself. The tracker gives, for "
+            "each muon, the chord L from the beam line to its last hit, the sagitta s of the fitted track over that "
+            "chord, the azimuth φ and the pseudorapidity η. Work out R = L²/(8s) + s/2, pT = 0.2998·B·R, "
+            "E = √(pT²cosh²η + m_μ²) and m² = (E₁+E₂)² − |p⃗₁+p⃗₂|² with p⃗ = pT(cos φ, sin φ, sinh η).")
+        intro.setWordWrap(True)
+        self.givens = QtWidgets.QTableWidget(2, 6)
+        self.givens.setHorizontalHeaderLabels(["muon", "charge", "chord L [m]", "sagitta s [mm]", "φ [rad]", "η"])
+        self.givens.verticalHeader().setVisible(False)
+        self.givens.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        self.givens.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.givens.setMaximumHeight(90)
+        self.consts = QtWidgets.QLabel()
+        grid = QtWidgets.QGridLayout()
+        self.inputs = {}
+        for c, head in enumerate(["", "R [m]", "pT [GeV]", "E [GeV]"]):
+            grid.addWidget(QtWidgets.QLabel(f"<b>{head}</b>"), 0, c)
+        for r, lab in enumerate(["μ⁻", "μ⁺"]):
+            grid.addWidget(QtWidgets.QLabel(lab), r + 1, 0)
+            for c, step in enumerate(["R", "pT", "E"]):
+                e = QtWidgets.QLineEdit(); e.setPlaceholderText(step)
+                self.inputs[(step, r)] = e
+                grid.addWidget(e, r + 1, c + 1)
+        grid.addWidget(QtWidgets.QLabel("<b>m(μ⁺μ⁻) [GeV]</b>"), 3, 0)
+        self.inputs[("mass", None)] = QtWidgets.QLineEdit(); self.inputs[("mass", None)].setPlaceholderText("mass")
+        grid.addWidget(self.inputs[("mass", None)], 3, 1)
+        check_btn = QtWidgets.QPushButton("Check my answers"); check_btn.setDefault(True)
+        solve_btn = QtWidgets.QPushButton("Show worked solution")
+        self.add_btn = QtWidgets.QPushButton("Add my mass to my measurements"); self.add_btn.setEnabled(False)
+        nxt = QtWidgets.QPushButton("Next event")
+        self.feedback = QtWidgets.QTextEdit(); self.feedback.setReadOnly(True)
+        self.hist = pg.PlotWidget(title="My reconstructed masses", labels={"bottom": "m(μμ) [GeV]", "left": "entries"})
+        buttons = QtWidgets.QHBoxLayout()
+        for w in (check_btn, solve_btn, self.add_btn, nxt):
+            buttons.addWidget(w)
+        buttons.addStretch()
+        left = QtWidgets.QVBoxLayout()
+        for w in (intro, self.givens, self.consts):
+            left.addWidget(w)
+        left.addLayout(grid); left.addLayout(buttons); left.addWidget(self.feedback, 1)
+        lay = QtWidgets.QHBoxLayout(self); lay.addLayout(left, 3); lay.addWidget(self.hist, 2)
+        check_btn.clicked.connect(self.check)
+        solve_btn.clicked.connect(self.show_solution)
+        self.add_btn.clicked.connect(self.add_mass)
+        nxt.clicked.connect(lambda: self.main.new_event())
+
+    def show_event(self, ev):
+        if ev is None:
+            return
+        self.ex = from_display_event(ev)
+        for r, t in enumerate(self.ex.tracks):
+            vals = [t.label, f"{t.charge:+d}", f"{t.chord:.4f}", f"{1000 * t.sagitta:.4f}", f"{t.phi:+.4f}", f"{t.eta:+.4f}"]
+            for c, v in enumerate(vals):
+                self.givens.setItem(r, c, QtWidgets.QTableWidgetItem(v))
+        self.consts.setText(f"B = {self.ex.B:g} T,   m_μ = {self.ex.m_mu:.5f} GeV,   process: {label(ev.process)}")
+        for e in self.inputs.values():
+            e.clear()
+        self.feedback.clear()
+        self.add_btn.setEnabled(False)
+
+    def check(self):
+        if self.ex is None:
+            return
+        html, mass_ok = [], False
+        for (step, track), edit in self.inputs.items():
+            if not edit.text().strip():
+                continue
+            fb = self.ex.check(step, edit.text().replace(",", "."), track)
+            who = "pair" if track is None else self.ex.tracks[track].label
+            colour = "#080" if fb.ok else "#b00"
+            html.append(f"<p style='color:{colour}'>{'✓' if fb.ok else '✗'} {step} ({who}): {fb.message}</p>")
+            mass_ok |= step == "mass" and fb.ok
+        self.feedback.setHtml("".join(html) or "<p>Fill in at least one box.</p>")
+        self.add_btn.setEnabled(mass_ok)
+
+    def show_solution(self):
+        if self.ex is not None:
+            self.feedback.append("\n".join(["", "Worked solution:"] + self.ex.worked_solution()))
+
+    def add_mass(self):
+        try:
+            self.my_masses.append(float(self.inputs[("mass", None)].text().replace(",", ".")))
+        except ValueError:
+            return
+        self.add_btn.setEnabled(False)
+        self.hist.clear()
+        m = np.asarray(self.my_masses)
+        lo, hi = m.min() - 0.05 * abs(m.min()), m.max() + 0.05 * abs(m.max()) + 1e-6
+        h, e = np.histogram(m, bins=max(5, min(30, len(m))), range=(lo, hi))
+        self.hist.plot(e, h, stepMode="center", fillLevel=0, brush=(31, 119, 180, 120))
+        self.hist.setTitle(f"My reconstructed masses: {len(m)} events, mean {m.mean():.4f} GeV")
+
 
 class EventTab(QtWidgets.QWidget):
     """2D projections (x–y and z–r) of the shared display event."""
@@ -355,7 +483,9 @@ class EventTab(QtWidgets.QWidget):
         top.addStretch()
         plots = QtWidgets.QHBoxLayout(); plots.addWidget(self.xy, 2); plots.addWidget(self.rz, 3)
         side = QtWidgets.QVBoxLayout(); side.addWidget(QtWidgets.QLabel("<b>Lowest-order diagram</b>"))
-        side.addWidget(self.feyn); side.addWidget(self.info); side.addStretch()
+        self.contrast = QtWidgets.QLabel(DIAGRAM_VS_TRACKS); self.contrast.setWordWrap(True)
+        self.contrast.setStyleSheet("background:#fff8e1; border:1px solid #e0c060; padding:6px; font-size:9pt;")
+        side.addWidget(self.feyn); side.addWidget(self.contrast); side.addWidget(self.info); side.addStretch()
         body = QtWidgets.QHBoxLayout(); body.addLayout(plots, 4); body.addLayout(side, 1)
         lay = QtWidgets.QVBoxLayout(self); lay.addLayout(top); lay.addLayout(body, 1)
         nxt.clicked.connect(lambda: self.main.new_event())
@@ -470,8 +600,9 @@ class PerformanceTab(QtWidgets.QWidget):
 
 # ---------------------------------------------------------------------------
 class ExplorerTab(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, main=None):
         super().__init__()
+        self.main = main
         # particle table
         rows = [p for p in DB.particles.values() if not p.id.startswith("anti-") and p.id not in ("mu+", "e+", "tau+", "pi-", "K-")]
         self.table = QtWidgets.QTableWidget(len(rows), 8)
@@ -491,6 +622,7 @@ class ExplorerTab(QtWidgets.QWidget):
         self.edit.setMinimumWidth(220)
         self.examples = QtWidgets.QComboBox(); self.examples.addItems(EXAMPLES)
         btn = QtWidgets.QPushButton("Check")
+        self.use = QtWidgets.QPushButton("Simulate this process"); self.use.setEnabled(False)
         self.out = QtWidgets.QTextEdit(); self.out.setReadOnly(True)
         form = QtWidgets.QHBoxLayout()
         for w in (QtWidgets.QLabel("Decay:"), self.edit, btn, QtWidgets.QLabel("Examples:"), self.examples):
@@ -509,9 +641,10 @@ class ExplorerTab(QtWidgets.QWidget):
         left = QtWidgets.QVBoxLayout(); left.addWidget(QtWidgets.QLabel("<b>Particle properties</b>"))
         left.addWidget(self.table, 1); left.addWidget(src); left.addWidget(dbox)
         right = QtWidgets.QVBoxLayout(); right.addWidget(QtWidgets.QLabel("<b>Conservation-law checker</b>"))
-        right.addLayout(form); right.addWidget(self.out, 1)
+        right.addLayout(form); right.addWidget(self.use); right.addWidget(self.out, 1)
         lay = QtWidgets.QHBoxLayout(self); lay.addLayout(left, 3); lay.addLayout(right, 2)
         btn.clicked.connect(self.run_check); self.edit.returnPressed.connect(self.run_check)
+        self.use.clicked.connect(self.use_process)
         self.examples.textActivated.connect(lambda t: (self.edit.setText(t), self.run_check()))
         for w in (self.beta, self.cos):
             w.valueChanged.connect(self.update_demo)
@@ -519,6 +652,8 @@ class ExplorerTab(QtWidgets.QWidget):
         self.run_check(); self.update_demo()
 
     def run_check(self):
+        self._gate = gate(self.edit.text())
+        self.use.setEnabled(self._gate.simulable and self.main is not None)
         try:
             v = check(self.edit.text())
         except (KeyError, ValueError) as e:
@@ -536,7 +671,17 @@ class ExplorerTab(QtWidgets.QWidget):
                     "Standard Model, never seen violated · approximate: lepton flavour (violated by neutrino "
                     "oscillations) · kinematic: energy–momentum. Passing all checks is necessary, not "
                     "sufficient: spin, parity, C and dynamics are not checked.</p>")
+        g = self._gate
+        html.append(f"<p><b>Simulation:</b> <span style='color:{'#080' if g.simulable else '#b00'}'>{g.message}</span></p>")
         self.out.setHtml("".join(html))
+
+    def use_process(self):
+        g = self._gate
+        if self.main is None or not g.simulable:
+            return
+        self.main.setup.select_process(g.process)
+        self.main.tabs.setCurrentWidget(self.main.mass)
+        self.main.set_status(f"{label(g.process)} → μ⁺μ⁻ selected: press Run simulation", busy=False)
 
     def update_demo(self):
         name = self.dproc.currentData()
@@ -582,8 +727,12 @@ class MainWindow(QtWidgets.QMainWindow):
         tabs.addTab(self.event3d, "Event display (3D)")
         self.add_event_listener(self.event2d.show_event)
         self.add_event_listener(self.event3d.show_event)
+        self.reconstruct = ReconstructTab(self)
+        tabs.addTab(self.reconstruct, "Reconstruct it yourself")
+        self.add_event_listener(self.reconstruct.show_event)
         tabs.addTab(self.performance, "Detector performance")
-        tabs.addTab(ExplorerTab(), "Physics explorer")
+        tabs.addTab(ExplorerTab(self), "Physics explorer")
+        self.tabs = tabs
         split = QtWidgets.QSplitter()
         scroll = QtWidgets.QScrollArea(); scroll.setWidget(self.setup); scroll.setWidgetResizable(True)
         scroll.setMinimumWidth(300)

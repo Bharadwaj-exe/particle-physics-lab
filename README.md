@@ -4,6 +4,8 @@ Simulates J/ψ, Υ(1S) and Z decays to μ⁺μ⁻ and passes them through a CMS-
 
 The model is educational: every step has a stated equation, assumption and test. It is not a CMS simulation.
 
+**What is new here** (details and prior art in `docs/research/NOVELTY_AUDIT.md`): one learning environment in which a decay must pass conservation-law checks before it is simulated; the learner can change the field, hit resolution and material of a hit-level tracker model calibrated to the published CMS material budget; the learner reconstructs the dimuon mass by hand from tracker measurements, with step-by-step feedback; and the simulated peaks are compared quantitatively with CMS 2011 open data.
+
 ## Quick start
 
 ```bash
@@ -35,8 +37,9 @@ python -m pytest
 | `particlelab/detector` | CMS-inspired and uniform-reference geometries, hit simulation (multiple scattering, smearing, efficiency), weighted circle and line fits |
 | `particlelab/analysis` | memory-bounded simulation pipeline, likelihood fitter and line shapes, toy MC, resolution studies, data–simulation comparison |
 | `particlelab/data` | CMS CSV ingestion: checksum, schema and row validation, selection with cut flow |
+| `particlelab/education` | learner logic: guided invariant-mass reconstruction from tracker measurements with diagnosed mistakes, and the conservation-law process gate |
 | `particlelab/visualization` | renderer-independent event-display data (detector shapes, true and reconstructed helices, hits, vertex, momentum arrows) |
-| `particlelab/app` | desktop GUI (PySide6, pyqtgraph) with a PyVista 3D event display |
+| `particlelab/app` | desktop GUI (PySide6, pyqtgraph) with a PyVista 3D event display and a "Reconstruct it yourself" tab |
 | `run_analysis.py`, `configs/` | reproducible end-to-end analysis |
 | `references/` | digitised CMS reference curves (tracker material budget, single-muon resolution) with their provenance |
 | `calibration/` | fit of the detector material to the CMS material reference (never to the dimuon data) |

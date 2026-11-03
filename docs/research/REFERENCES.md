@@ -22,3 +22,17 @@
 15. S. Baker and R. D. Cousins, "Clarification of the use of chi-square and likelihood functions in fits to histograms", Nucl. Instrum. Methods 221 (1984) 437.
 16. T. Sjöstrand et al., "An introduction to PYTHIA 8.2", Comput. Phys. Commun. 191 (2015) 159.
 17. S. Agostinelli et al. (Geant4), "Geant4 — a simulation toolkit", Nucl. Instrum. Methods A 506 (2003) 250.
+
+**Education and related tools (checked 2026-11-03; see `NOVELTY_AUDIT.md`):**
+
+18. R. V. Harlander, S. Y. Klein, M. Lipp, "FeynGame", Comput. Phys. Commun. 256 (2020) 107465, arXiv:2003.00896; FeynGame 3.0: L. Bündgen, R. V. Harlander, S. Y. Klein, M. C. Schaaf, arXiv:2501.04651.
+19. J. R. Gaunt, A. Owen, "FeynCraft: A Game of Feynman Diagrams", arXiv:2510.14082 (2025).
+20. B. Assi, C. Bierlich, R. Gambhir, P. Ilten, T. Menzo, S. Mrenna, M. Szewc, M. K. Wilkinson, A. Youssef, J. Zupan, "Vistas: A Visualization Interface for Particle Collision Simulations", arXiv:2606.19524 (2026).
+21. C. Kourkoumelis, S. Vourakis, "HYPATIA — an online tool for ATLAS event visualization", Phys. Educ. 49 (2014) 21.
+22. B. Tomasik, J. Kekelakova, I. Melo, V. Pleskot, "Bridging the gap between cutting-edge science and school: non-formal education in high-energy physics", arXiv:2401.17103 (GIREP 2023).
+23. K. Cecire, M. Bardeen, T. McCauley, "The CMS Masterclass and Particle Physics Outreach", EPJ Web Conf. 71 (2014) 00027.
+24. M. N. Dahlkemper, P. Klein, A. Müller, S. M. Schmeling, J. Wiener, "Opportunities and Challenges of Using Feynman Diagrams with Upper Secondary Students", Physics 4(4) (2022) 1331, doi:10.3390/physics4040085.
+25. P. Lindenau, M. Kobel, G. Pospiech, "Learning difficulties in the interpretation of Feynman diagrams", talk at WPCE-3 (December 2021).
+26. M. Dahlkemper, *The Use of Feynman Diagrams in Physics Education: Opportunities, Challenges, Practices*, PhD thesis, University of Göttingen (2024).
+27. ATLAS Open Data educational notebooks, github.com/atlas-outreach-data-tools/notebooks-collection-opendata (web resource).
+28. Particle Physics Playground, Siena College, sites.google.com/siena.edu/particle-physics-playground (web resource).

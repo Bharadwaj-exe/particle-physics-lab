@@ -70,3 +70,10 @@ The 2D displays were kept and now draw the same `DisplayEvent` as the 3D view.
 - Effect on the published Z data fit (BW ⊗ CB): the mass moved from 90.948 to 90.915 GeV (within its error). Its statistical error went from ±39 to ±76 MeV, because the old value came from the noisy Hessian.
 
 **ADR-18 · Systematic uncertainties on the data masses.** `analysis/systematics.py` refits the data with the fit window, binning and signal model varied one at a time. A variation is used only if the minimiser converged and p > 0.01. A Hessian that is not positive definite is allowed, because the CB-type tail parameters have nearly flat directions that do not affect the mass. The largest accepted shift in each category is taken, and the categories are added in quadrature. Masses are also fitted for three detector regions (both muons central, one central, neither). Window variations change the sample, so the estimate is conservative.
+
+**ADR-19 · Learner-driven reconstruction and a process gate.** The novelty audit (`research/NOVELTY_AUDIT.md`) found that the tool computed every invariant mass automatically. That is the same limitation the project's own literature review criticises in masterclass tools, and the conservation checker did not control what was simulated.
+- `particlelab/education/` adds two pieces of pure, testable logic:
+  - a guided exercise in which the learner computes R, pT, E and m from the tracker's measurements, with feedback that names common mistakes and never reveals a wrong step's answer;
+  - a gate that sends only conservation-checked, implemented decays to the generator.
+- The GUI only displays them, in the "Reconstruct it yourself" tab, the setup panel and the explorer. A note under the Feynman diagram states that its lines are not trajectories.
+- The hand calculation is tested to reproduce the simulation's reconstructed mass to 10⁻⁹, so the exercise and the analysis cannot drift apart.

@@ -21,6 +21,7 @@ particle-physics-lab/
 │   ├── analysis/               what is measured: pipeline, line shapes, likelihood fits, studies, data–sim comparison
 │   ├── data/                   experimental data: CMS open-data ingestion and validation
 │   ├── visualization/          renderer-independent display data (event geometry, tracks, hits)
+│   ├── education/              learner logic without GUI: guided mass reconstruction with diagnosed mistakes, process gate
 │   └── app/                    desktop interface (PySide6/pyqtgraph; 3D view with PyVista/VTK)
 └── tests/                      unit · integration · physics_validation · regression
 ```
