@@ -217,7 +217,8 @@ def from_display_event(ev) -> Exercise:
     tm, tp = by_label["μ⁻"], by_label["μ⁺"]
     chord = []
     for t in (tm, tp):
-        h = np.asarray(t.hits)
+        # simulated events: last recorded hit; CMS data events: last computed layer crossing
+        h = np.asarray(t.hits if len(t.hits) else getattr(t, "crossings", t.hits))
         chord.append(float(np.hypot(h[:, 0], h[:, 1]).max()) if len(h) else 1.0)
     ex = from_momenta(tm.p_reco, tp.p_reco, ev.B, tuple(chord))
     # charges as reconstructed (normally −1, +1)

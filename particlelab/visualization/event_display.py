@@ -1,8 +1,13 @@
-"""Display data for one simulated event, independent of any rendering library.
+"""Display data for one event, independent of any rendering library.
 
 Turns the outputs of the existing physics and detector code (unchanged) into
 plain arrays that the 2D (pyqtgraph) and 3D (PyVista) views draw. Coordinates
 are in metres, with the beam along z, matching the simulation.
+
+Every point on a path and every hit also carries its flight time in ns,
+t = (path length) / (beta c), so the views can animate an event on one physical
+clock. Events come from the simulation (``make_event``) or from the CMS 2011
+open data (``data_event``), where only the measured momenta are known.
 """
 from __future__ import annotations
 
@@ -13,10 +18,15 @@ import numpy as np
 from ..detector import DetectorConfig, simulate_hits, fit_tracks
 from ..detector.simulation import helix_at
 from ..physics import generate, inv_mass, pt_eta_phi
+from ..physics.kinematics import M_MU
 from ..units import C_TRACK, cm
 
 BEAM_PIPE_RADIUS = 3.0 * cm      # drawn for orientation only; not simulated as material
 BEAM_AXIS_HALF_LENGTH = 3.2
+C_LIGHT = 0.299792458            # m / ns
+DATA_B = 3.8                     # T, CMS solenoid field in 2011
+# narrow mass windows for picking data events to display: mostly signal, some background
+DATA_DISPLAY_WINDOWS = {"J/psi": (3.0, 3.2), "Upsilon(1S)": (9.3, 9.6), "Z": (85.0, 97.0)}
 
 
 # ---- detector geometry ---------------------------------------------------------
@@ -89,6 +99,20 @@ class DisplayTrack:
     missed: np.ndarray         # (m,3) crossings that were not recorded (inefficiency)
     sigma_pt: float            # hit-error-only uncertainty
     n_hits: int
+    true_t: np.ndarray = None  # (N,) ns, flight time at each point of true_path
+    reco_t: np.ndarray = None  # (N,) ns, along reco_path
+    hit_t: np.ndarray = None   # (k,) ns, when the muon crosses each recorded hit's surface
+    missed_t: np.ndarray = None
+    crossings: np.ndarray = field(default_factory=lambda: np.empty((0, 3)))   # data events: computed layer crossings
+    crossing_t: np.ndarray = field(default_factory=lambda: np.empty(0))
+
+    @property
+    def has_truth(self): return len(self.true_path) > 0
+
+    @property
+    def flight_path(self):
+        """Path followed in the animation: the true one if known, else the measured one."""
+        return (self.true_path, self.true_t) if self.has_truth else (self.reco_path, self.reco_t)
 
     @property
     def pt_true(self): return float(np.hypot(*self.p_true[:2]))
@@ -113,6 +137,18 @@ class DisplayEvent:
     tracks: list = field(default_factory=list)
     passes_cuts: bool = True
     seed: object = None
+    source: str = "simulation"     # or "CMS 2011 data"
+    run: int | None = None
+    event_number: int | None = None
+    muon_types: tuple = ()         # data: CMS muon type per track, G (global) or T (tracker)
+
+    @property
+    def is_data(self): return self.source != "simulation"
+
+    @property
+    def t_max(self):
+        """Time in ns when the last muon leaves the drawn volume."""
+        return max(float(t.flight_path[1][-1]) for t in self.tracks)
 
 
 def helix_path(p, q, B, z0, s_max, n=240):
@@ -123,6 +159,26 @@ def helix_path(p, q, B, z0, s_max, n=240):
     s = np.linspace(0.0, s_max, n)
     x, y, z = helix_at(s, R, float(np.sign(q)), np.arctan2(p[1], p[0]), p[2] / pt, z0)
     return np.column_stack([x, y, z])
+
+
+def flight_time(s, p):
+    """Flight time in ns after transverse arc length ``s`` (m) for a muon of momentum ``p`` (GeV)."""
+    p = np.asarray(p, float)
+    pt, ptot = np.hypot(p[0], p[1]), np.linalg.norm(p)
+    beta = ptot / np.hypot(ptot, M_MU)
+    return np.asarray(s, float) * (ptot / pt) / (beta * C_LIGHT)
+
+
+def path_until(path, t, t_cut):
+    """Part of ``path`` (N,3) flown by time ``t_cut``, ending exactly at the interpolated position."""
+    path, t = np.asarray(path), np.asarray(t)
+    if t_cut >= t[-1]:
+        return path
+    if t_cut <= t[0]:
+        return path[:1]
+    i = int(np.searchsorted(t, t_cut, side="right"))
+    f = (t_cut - t[i - 1]) / (t[i] - t[i - 1])
+    return np.vstack([path[:i], path[i - 1] + f * (path[i] - path[i - 1])])
 
 
 def momentum_arrow(p, origin, base=0.15, per_decade=0.12):
@@ -181,6 +237,77 @@ def make_event(name: str, det: DetectorConfig, rng: np.random.Generator, require
             hits_ideal=np.column_stack([ideal_x, ideal_y, ideal_z]),
             hits_disk=h.is_disk[0][rec].copy(),
             missed=np.column_stack([h.x[0][crossed & ~rec], h.y[0][crossed & ~rec], h.z[0][crossed & ~rec]]),
-            sigma_pt=float(f.sigma_pt[0]), n_hits=int(f.n_hits[0])))
+            sigma_pt=float(f.sigma_pt[0]), n_hits=int(f.n_hits[0]),
+            true_t=flight_time(np.linspace(0.0, s_end, 240), p),
+            reco_t=flight_time(np.linspace(0.0, s_end, 240), f.p[0]),
+            hit_t=flight_time(h.s[0][rec], p),
+            missed_t=flight_time(h.s[0][crossed & ~rec], p)))
     reco_m = float(inv_mass(tracks[0].p_reco[None], tracks[1].p_reco[None])[0])
     return DisplayEvent(name, det.name, det.B, np.array([0.0, 0.0, z0]), float(ev.mass[0]), reco_m, tracks, passes)
+
+
+# ---- CMS open-data events -------------------------------------------------------------
+
+def layer_crossings(p, q, det: DetectorConfig, z0: float = 0.0):
+    """Where an ideal helix (no scattering, no smearing) crosses the sensitive layers of ``det``.
+
+    Uses the simulation's own surface code with smearing, scattering and inefficiency off,
+    so the points are exactly where the model would place unsmeared hits.
+    Returns (points (k,3), transverse arc lengths (k,)).
+    """
+    ideal = det.with_(smear=False, multiple_scattering=False, hit_efficiency=1.0)
+    h = simulate_hits(np.asarray(p, float)[None], np.array([float(q)]), ideal, np.random.default_rng(0),
+                      np.array([z0]))
+    m = h.detected[0]
+    return np.column_stack([h.x[0][m], h.y[0][m], h.z[0][m]]), h.s[0][m]
+
+
+def exit_arc_length(p, B, r_out, z_out, z0=0.0):
+    """Transverse arc length at which a helix from (0, 0, z0) leaves r < r_out, |z| < z_out."""
+    p = np.asarray(p, float)
+    pt = np.hypot(p[0], p[1])
+    R = pt / (C_TRACK * B)
+    s_r = 2 * R * np.arcsin(r_out / (2 * R)) if r_out < 2 * R else np.pi * R     # a looper turns back at s = πR
+    cot = p[2] / pt
+    s_z = (np.sign(cot) * z_out - z0) / cot if abs(cot) > 1e-12 else np.inf
+    return float(min(s_r, s_z))
+
+
+def data_event(row, process: str, det: DetectorConfig) -> DisplayEvent:
+    """Display event from one row of the CMS dimuon CSV (columns px1 … Q2, Run, Event, type1, type2).
+
+    Only the measured momenta and charges are known: the vertex is drawn at the origin
+    (it is not in the file) and the tracks are ideal helices in ``det.B`` (use 3.8 T), without
+    scattering or energy loss. ``crossings`` are computed from these momenta in ``det``'s
+    geometry; they are not CMS hits.
+    """
+    tracks = []
+    r_out = max(b.radius for b in det.barrels)
+    z_out = max(d.z for d in det.disks) if det.disks else max(min(b.half_length, 3.0) for b in det.barrels)
+    for i in (1, 2):
+        p = np.array([row[f"px{i}"], row[f"py{i}"], row[f"pz{i}"]], float)
+        q = int(row[f"Q{i}"])
+        s_end = exit_arc_length(p, det.B, r_out, z_out)
+        pts, s_hit = layer_crossings(p, q, det)
+        tracks.append(DisplayTrack(
+            label="μ⁻" if q < 0 else "μ⁺", charge_true=q, charge_reco=q, p_true=p.copy(), p_reco=p.copy(),
+            true_path=np.empty((0, 3)), reco_path=helix_path(p, q, det.B, 0.0, s_end), hits=np.empty((0, 3)),
+            hits_ideal=np.empty((0, 3)), hits_disk=np.empty(0, bool), missed=np.empty((0, 3)),
+            sigma_pt=float("nan"), n_hits=0, true_t=np.empty(0),
+            reco_t=flight_time(np.linspace(0.0, s_end, 240), p), hit_t=np.empty(0), missed_t=np.empty(0),
+            crossings=pts, crossing_t=flight_time(s_hit, p)))
+    tracks.sort(key=lambda t: t.charge_reco)          # μ⁻ first, as in simulated events
+    m = float(inv_mass(tracks[0].p_reco[None], tracks[1].p_reco[None])[0])
+    return DisplayEvent(process, "CMS (2011 data)", det.B, np.zeros(3), float("nan"), m, tracks, True,
+                        source="CMS 2011 data", run=int(row["Run"]), event_number=int(row["Event"]),
+                        muon_types=tuple(str(row[f"type{i}"]) for i in (1, 2)))
+
+
+def pick_data_row(events, process: str, rng: np.random.Generator):
+    """A random selected CMS event inside the display window of ``process`` (a pandas row)."""
+    lo, hi = DATA_DISPLAY_WINDOWS[process]
+    m = events["M_recomputed"] if "M_recomputed" in events else events["M"]
+    cand = events[(m > lo) & (m < hi)]
+    if not len(cand):
+        raise LookupError(f"no CMS events with {lo} < M < {hi} GeV")
+    return cand.iloc[int(rng.integers(len(cand)))]

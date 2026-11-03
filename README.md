@@ -38,8 +38,8 @@ python -m pytest
 | `particlelab/analysis` | memory-bounded simulation pipeline, likelihood fitter and line shapes, toy MC, resolution studies, data–simulation comparison |
 | `particlelab/data` | CMS CSV ingestion: checksum, schema and row validation, selection with cut flow |
 | `particlelab/education` | learner logic: guided invariant-mass reconstruction from tracker measurements with diagnosed mistakes, and the conservation-law process gate |
-| `particlelab/visualization` | renderer-independent event-display data (detector shapes, true and reconstructed helices, hits, vertex, momentum arrows) |
-| `particlelab/app` | desktop GUI (PySide6, pyqtgraph) with a PyVista 3D event display and a "Reconstruct it yourself" tab |
+| `particlelab/visualization` | renderer-independent event-display data (detector shapes, true and reconstructed helices, hits, vertex, momentum arrows, flight times; display events from CMS open data) |
+| `particlelab/app` | desktop GUI (PySide6, pyqtgraph) with animated 2D and PyVista 3D event displays, real CMS events beside simulated ones, light/dark themes, PNG export and a "Reconstruct it yourself" tab |
 | `run_analysis.py`, `configs/` | reproducible end-to-end analysis |
 | `references/` | digitised CMS reference curves (tracker material budget, single-muon resolution) with their provenance |
 | `calibration/` | fit of the detector material to the CMS material reference (never to the dimuon data) |

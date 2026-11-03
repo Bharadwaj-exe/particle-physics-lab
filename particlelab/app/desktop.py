@@ -24,11 +24,18 @@ from ..analysis.studies import pt_resolution
 from ..data import cms
 from ..physics import generate, boost, decay_rest
 from ..provenance import run_record, save_json
-from ..visualization.event_display import make_event, detector_geometry, momentum_arrow
+from ..visualization.event_display import (make_event, detector_geometry, momentum_arrow, path_until, data_event,
+                                           pick_data_row, DATA_B)
 from ..education import from_display_event, gate
 from ..units import C_TRACK, um
+from . import theme
+from .animation import AnimationBar, AnimationClock
 
 pg.setConfigOptions(antialias=True, background="w", foreground="k")
+
+
+def fg():
+    return theme.current()["fg"]
 COLORS = {"J/psi": "#1f77b4", "Upsilon(1S)": "#2ca02c", "Z": "#d62728"}
 DB = load_particles()
 
@@ -115,6 +122,13 @@ class SetupPanel(QtWidgets.QGroupBox):
         self.smear = QtWidgets.QCheckBox("hit smearing"); self.smear.setChecked(True)
         self.ptmin = QtWidgets.QDoubleSpinBox(); self.ptmin.setRange(0.5, 50); self.ptmin.setValue(3.0); self.ptmin.setSuffix(" GeV")
         self.etamax = QtWidgets.QDoubleSpinBox(); self.etamax.setRange(0.1, 2.5); self.etamax.setValue(2.4)
+        self.source = QtWidgets.QComboBox()
+        self.source.addItem("Simulated events", "sim")
+        self.source.addItem("CMS 2011 data events", "data")
+        self.source.setToolTip("What the event displays and the reconstruction exercise show")
+        if not cms.available():
+            self.source.model().item(1).setEnabled(False)
+            self.source.setToolTip("CMS data not downloaded: python -c \"from particlelab.data import cms; cms.fetch()\"")
         self.gate_label = QtWidgets.QLabel(); self.gate_label.setWordWrap(True)
         self.gate_label.setStyleSheet("color:#080; font-size: 9pt;")
         self.proc.currentIndexChanged.connect(self._update_gate)
@@ -122,14 +136,18 @@ class SetupPanel(QtWidgets.QGroupBox):
         for lab, w in [("Process", self.proc), ("Generated events", self.n), ("Random seed", self.seed),
                        ("Detector", self.preset), ("Magnetic field", self.B), ("Hit-resolution scale", self.res),
                        ("Material scale", self.mat), ("Hit efficiency", self.eff), ("", self.ms), ("", self.smear),
-                       ("Muon pT >", self.ptmin), ("Muon |η| <", self.etamax)]:
+                       ("Muon pT >", self.ptmin), ("Muon |η| <", self.etamax), ("Event displays", self.source)]:
             f.addRow(lab, w)
         f.insertRow(1, self.gate_label)          # full width under the process choice
 
     def _update_gate(self):
         g = gate(f"{self.proc.currentData()} -> mu+ mu-")
         self.gate_label.setText(("✓ " if g.simulable else "✗ ") + g.message)
-        self.gate_label.setStyleSheet(f"color:{'#080' if g.simulable else '#b00'}; font-size: 9pt;")
+        th = theme.current()
+        self.gate_label.setStyleSheet(f"color:{th['ok'] if g.simulable else th['bad']}; font-size: 9pt;")
+
+    def theme_changed(self):
+        self._update_gate()
 
     def select_process(self, key: str) -> bool:
         i = self.proc.findData(key)
@@ -216,6 +234,13 @@ class MassTab(QtWidgets.QWidget):
         self.main.last_sim = r["sim"]
         self.main.new_event(seed=r["sim"].seed)
         self.main.performance.show_cutflow(r["sim"])
+        self.draw_result(r)
+
+    def theme_changed(self):
+        if self.result is not None:
+            self.draw_result(self.result)
+
+    def draw_result(self, r):
         name = r["settings"]["process"]
         self.plot.clear()
         rows = []
@@ -224,8 +249,9 @@ class MassTab(QtWidgets.QWidget):
         sf = r.get("sim_fit")
         if df is not None:
             ctr = 0.5 * (df.edges[1:] + df.edges[:-1])
-            self.plot.addItem(pg.ErrorBarItem(x=ctr, y=df.counts, height=2 * np.sqrt(df.counts), pen="k"))
-            self.plot.plot(ctr, df.counts, pen=None, symbol="o", symbolSize=4, symbolBrush="k", name="CMS data")
+            self.plot.addItem(pg.ErrorBarItem(x=ctr, y=df.counts, height=2 * np.sqrt(df.counts), pen=fg()))
+            self.plot.plot(ctr, df.counts, pen=None, symbol="o", symbolSize=4, symbolBrush=fg(), symbolPen=None,
+                           name="CMS data")
             fine = np.linspace(*df.window, 1200)
             self.plot.plot(fine, df.curve(fine), pen=pg.mkPen("#ff7f0e", width=2), name=f"data fit ({df.signal})")
             self.plot.plot(fine, df.curve(fine, "background"), pen=pg.mkPen("#ff7f0e", width=1, style=QtCore.Qt.DashLine),
@@ -239,7 +265,7 @@ class MassTab(QtWidgets.QWidget):
             hs, _ = np.histogram(sim.reco_mass, sf.edges)
             self.plot.plot(sf.edges, hs, stepMode="center", pen=pg.mkPen(COLORS[name], width=2), name="simulation")
             fine = np.linspace(*sf.window, 1200)
-            self.plot.plot(fine, sf.curve(fine), pen=pg.mkPen("k", width=1.5, style=QtCore.Qt.DashLine),
+            self.plot.plot(fine, sf.curve(fine), pen=pg.mkPen(fg(), width=1.5, style=QtCore.Qt.DashLine),
                            name=f"fit ({sf.signal})")
         fmt = lambda f, attr, err, k=1.0, d=5: "—" if f is None else f"{k * getattr(f, attr):.{d}f} ± {k * getattr(f, err):.{d}f}"
         rows = [("PDG mass [GeV]", f"{DB.get(name).mass:.5f}", f"{DB.get(name).mass:.5f}"),
@@ -307,10 +333,11 @@ class FeynmanWidget(QtWidgets.QWidget):
 
     def paintEvent(self, _):
         p = QtGui.QPainter(self); p.setRenderHint(QtGui.QPainter.Antialiasing)
-        p.fillRect(self.rect(), QtGui.QColor("white"))
+        th = theme.current()
+        p.fillRect(self.rect(), QtGui.QColor(th["bg"]))
         w, h = self.width(), self.height() - 24
         v1, v2 = QtCore.QPointF(w * 0.35, h * 0.5), QtCore.QPointF(w * 0.65, h * 0.5)
-        p.setPen(QtGui.QPen(QtGui.QColor("black"), 2))
+        p.setPen(QtGui.QPen(QtGui.QColor(th["fg"]), 2))
         f = p.font(); f.setPointSize(11); p.setFont(f)
         quark = {"J/psi": "c", "Upsilon(1S)": "b", "Z": "q"}[self.name]
 
@@ -318,7 +345,7 @@ class FeynmanWidget(QtWidgets.QWidget):
             p.drawLine(a, b)
             mid = (a + b) / 2; d = b - a; L = (d.x()**2 + d.y()**2) ** 0.5; u = d / L
             nrm = QtCore.QPointF(-u.y(), u.x())
-            p.setBrush(QtGui.QColor("black"))
+            p.setBrush(QtGui.QColor(th["fg"]))
             p.drawPolygon(QtGui.QPolygonF([mid + u * 7, mid - u * 5 + nrm * 5, mid - u * 5 - nrm * 5]))
             p.drawText(pos, text)
 
@@ -333,7 +360,7 @@ class FeynmanWidget(QtWidgets.QWidget):
             path.lineTo(v1.x() + (v2.x() - v1.x()) * i / 32, v1.y() + 7 * np.sin(np.pi * i / 2))
         p.setBrush(QtCore.Qt.NoBrush); p.drawPath(path)
         p.drawText(QtCore.QPointF((v1.x() + v2.x()) / 2 - 10, v1.y() - 14), "Z/γ*" if self.name == "Z" else "γ*")
-        f.setPointSize(9); p.setFont(f); p.setPen(QtGui.QColor("#555"))
+        f.setPointSize(9); p.setFont(f); p.setPen(QtGui.QColor(th["muted"]))
         note = {"J/psi": "cc̄ bound state annihilates through a virtual photon",
                 "Upsilon(1S)": "bb̄ bound state annihilates through a virtual photon",
                 "Z": "Drell–Yan: qq̄ → Z/γ* → μ⁺μ⁻"}[self.name]
@@ -341,6 +368,14 @@ class FeynmanWidget(QtWidgets.QWidget):
 
 
 def event_info_lines(ev) -> list:
+    if ev.is_data:
+        lines = [f"CMS 2011 data: run {ev.run}, event {ev.event_number}",
+                 f"m(μμ) = {ev.reco_mass:.4f} GeV, in the {label(ev.process)} window (may be background)",
+                 f"muon types {'/'.join(ev.muon_types)} (G global, T tracker); vertex not in the file, drawn at 0"]
+        for t in ev.tracks:
+            lines.append(f"{t.label}: q = {t.charge_reco:+d}, pT = {t.pt_reco:.3f} GeV, η = {t.eta_reco:+.2f}, "
+                         f"R = {t.pt_reco / (C_TRACK * ev.B):.2f} m")
+        return lines
     lines = [f"{label(ev.process)} → μ⁺μ⁻   true m = {ev.true_mass:.4f} GeV",
              f"reconstructed m = {ev.reco_mass:.4f} GeV", f"vertex z = {100 * ev.vertex[2]:.1f} cm"]
     for t in ev.tracks:
@@ -421,7 +456,9 @@ class ReconstructTab(QtWidgets.QWidget):
             vals = [t.label, f"{t.charge:+d}", f"{t.chord:.4f}", f"{1000 * t.sagitta:.4f}", f"{t.phi:+.4f}", f"{t.eta:+.4f}"]
             for c, v in enumerate(vals):
                 self.givens.setItem(r, c, QtWidgets.QTableWidgetItem(v))
-        self.consts.setText(f"B = {self.ex.B:g} T,   m_μ = {self.ex.m_mu:.5f} GeV,   process: {label(ev.process)}")
+        what = (f"CMS 2011 data, run {ev.run} event {ev.event_number} ({label(ev.process)} window); chord to the last "
+                "computed layer crossing" if ev.is_data else f"process: {label(ev.process)}")
+        self.consts.setText(f"B = {self.ex.B:g} T,   m_μ = {self.ex.m_mu:.5f} GeV,   {what}")
         for e in self.inputs.values():
             e.clear()
         self.feedback.clear()
@@ -436,7 +473,7 @@ class ReconstructTab(QtWidgets.QWidget):
                 continue
             fb = self.ex.check(step, edit.text().replace(",", "."), track)
             who = "pair" if track is None else self.ex.tracks[track].label
-            colour = "#080" if fb.ok else "#b00"
+            colour = theme.current()["ok" if fb.ok else "bad"]
             html.append(f"<p style='color:{colour}'>{'✓' if fb.ok else '✗'} {step} ({who}): {fb.message}</p>")
             mass_ok |= step == "mass" and fb.ok
         self.feedback.setHtml("".join(html) or "<p>Fill in at least one box.</p>")
@@ -460,77 +497,244 @@ class ReconstructTab(QtWidgets.QWidget):
         self.hist.setTitle(f"My reconstructed masses: {len(m)} events, mean {m.mean():.4f} GeV")
 
 
+FLASH_NS = 0.6      # a hit is highlighted for this long after the muon crosses its surface
+
+
+class EventView2D(QtWidgets.QWidget):
+    """Transverse (x–y) and longitudinal (z–r) views of one event, drawn at any animation time."""
+
+    def __init__(self):
+        super().__init__()
+        self.caption = QtWidgets.QLabel(); self.caption.setWordWrap(True)
+        self.xy = pg.PlotWidget(title="Transverse view (B along z, out of page)", labels={"bottom": "x [m]", "left": "y [m]"})
+        self.rz = pg.PlotWidget(title="Longitudinal view", labels={"bottom": "z [m]", "left": "±r [m]"})
+        self.xy.setAspectLocked(True)
+        plots = QtWidgets.QHBoxLayout(); plots.addWidget(self.xy, 2); plots.addWidget(self.rz, 3)
+        lay = QtWidgets.QVBoxLayout(self); lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(self.caption); lay.addLayout(plots, 1)
+        self.ev = self.geom = None
+        self.show_true = True
+        self.progress, self.span = 1.0, None
+        self._tracks = []
+
+    # ---- building ---------------------------------------------------------------
+    def draw_detector(self, geom):
+        th = theme.current()
+        t = np.linspace(0, 2 * np.pi, 240)
+        for c in geom.cylinders:
+            if c.group == "beam pipe":
+                continue
+            self.xy.plot(c.radius * np.cos(t), c.radius * np.sin(t), pen=pg.mkPen(th["detector_xy"]))
+            for s in (1, -1):
+                self.rz.plot([-c.half_length, c.half_length], [s * c.radius] * 2, pen=pg.mkPen(th["detector"], width=1.5))
+        for d in geom.disks:
+            for sr in (1, -1):
+                self.rz.plot([d.z] * 2, [sr * d.r_min, sr * d.r_max], pen=pg.mkPen(th["detector"], width=1.5))
+        self.xy.addItem(pg.TextItem("⊙ B", color=th["muted"], anchor=(0, 0)))
+
+    def set_event(self, ev, geom, progress=None, span=None):
+        self.ev, self.geom = ev, geom
+        if progress is not None:
+            self.progress = progress
+        self.span = span
+        th = theme.current()
+        self.xy.clear(); self.rz.clear()
+        self._tracks = []
+        if ev is None:
+            return
+        if geom is not None:
+            self.draw_detector(geom)
+        if ev.is_data:
+            self.caption.setText(f"<b>CMS 2011 data</b>, run {ev.run}, event {ev.event_number}: "
+                                 f"m(μμ) = {ev.reco_mass:.3f} GeV · helices from the measured momenta, B = {ev.B:g} T · "
+                                 f"<span style='color:{th['crossing']}'>○</span> computed layer crossings (not CMS hits)")
+        else:
+            self.caption.setText(f"<b>Simulation</b>: {label(ev.process)} → μ⁺μ⁻, reconstructed m = {ev.reco_mass:.3f} GeV, "
+                                 f"B = {ev.B:g} T")
+        for t in ev.tracks:
+            col = th["reco"][t.label]
+            dashed = th["true"][t.label] if th["name"] == "dark" else col
+            path, times = t.flight_path
+            side = np.sign(path[-1, 1]) or 1.0
+            rec = {"t": t, "side": side, "path": path, "times": times, "items": []}
+            for plot, proj in ((self.xy, "xy"), (self.rz, "rz")):
+                it = {
+                    "true": plot.plot(pen=pg.mkPen(dashed, width=1, style=QtCore.Qt.DashLine)),
+                    "reco": plot.plot(pen=pg.mkPen(col, width=2)),
+                    "flight": plot.plot(pen=pg.mkPen(col, width=3)),
+                    "head": plot.plot(pen=None, symbol="o", symbolSize=11, symbolBrush=col, symbolPen=th["fg"]),
+                    "hits": plot.plot(pen=None, symbol="o", symbolSize=5, symbolBrush=th["hit"], symbolPen=None),
+                    "missed": plot.plot(pen=None, symbol="x", symbolSize=8, symbolPen=th["missed"]),
+                    "cross": plot.plot(pen=None, symbol="o", symbolSize=7, symbolBrush=None,
+                                       symbolPen=pg.mkPen(th["crossing"], width=1.5)),
+                    "flash": plot.plot(pen=None, symbol="o", symbolSize=10, symbolBrush=th["flash"], symbolPen=None),
+                }
+                if proj == "xy":
+                    o, d, L = momentum_arrow(t.p_reco, ev.vertex)
+                    dt = d[:2] / max(np.linalg.norm(d[:2]), 1e-12)
+                    it["arrow"] = plot.plot([o[0], o[0] + L * dt[0]], [o[1], o[1] + L * dt[1]], pen=pg.mkPen(col, width=4))
+                rec["items"].append((proj, it))
+            self._tracks.append(rec)
+        self.xy.setRange(xRange=(-1.25, 1.25), yRange=(-1.25, 1.25))
+        self.rz.setRange(xRange=(-3, 3), yRange=(-1.25, 1.25))
+        self._apply()
+
+    # ---- animation ----------------------------------------------------------------
+    def set_progress(self, fraction, span=None):
+        self.progress = min(max(float(fraction), 0.0), 1.0)
+        if span is not None:
+            self.span = span
+        self._apply()
+
+    @staticmethod
+    def _proj(a, proj, side):
+        a = np.asarray(a).reshape(-1, 3)
+        if proj == "xy":
+            return a[:, 0], a[:, 1]
+        return a[:, 2], side * np.hypot(a[:, 0], a[:, 1])
+
+    def _apply(self):
+        if self.ev is None:
+            return
+        final = self.progress >= 1.0
+        t_cut = self.progress * (self.span or self.ev.t_max)
+        empty = (np.empty(0), np.empty(0))
+
+        def shown(points, times):
+            # points are stored in flight order, so the first n are those already crossed
+            if final or not len(points):
+                return points
+            return points[:int(np.sum(np.asarray(times) <= t_cut))]
+
+        for rec in self._tracks:
+            t, side = rec["t"], rec["side"]
+            flown = None if final else path_until(rec["path"], rec["times"], t_cut)
+            hits, missed, cross = shown(t.hits, t.hit_t), shown(t.missed, t.missed_t), shown(t.crossings, t.crossing_t)
+            fresh = [np.empty((0, 3))]
+            if not final:
+                for pts, times in ((t.hits, t.hit_t), (t.crossings, t.crossing_t)):
+                    if len(pts):
+                        tt = np.asarray(times)
+                        fresh.append(pts[(tt <= t_cut) & (tt > t_cut - FLASH_NS)])
+            fresh = np.vstack(fresh)
+            for proj, it in rec["items"]:
+                P = lambda a: self._proj(a, proj, side) if len(a) else empty
+                it["true"].setData(*P(t.true_path)); it["true"].setVisible(final and self.show_true and t.has_truth)
+                it["reco"].setData(*P(t.reco_path)); it["reco"].setVisible(final)
+                if "arrow" in it:
+                    it["arrow"].setVisible(final)
+                it["flight"].setVisible(not final); it["head"].setVisible(not final)
+                if not final:
+                    it["flight"].setData(*P(flown)); it["head"].setData(*P(flown[-1:]))
+                it["hits"].setData(*P(hits)); it["missed"].setData(*P(missed)); it["cross"].setData(*P(cross))
+                it["flash"].setData(*P(fresh)); it["flash"].setVisible(not final)
+
+
 class EventTab(QtWidgets.QWidget):
-    """2D projections (x–y and z–r) of the shared display event."""
+    """2D projections (x–y and z–r) of the shared display event, animated, optionally above a CMS data event."""
     def __init__(self, main):
         super().__init__()
         self.main = main
         self.shown_event = None
+        self.clock = getattr(main, "clock", None) or AnimationClock(self)
         nxt = QtWidgets.QPushButton("Next event")
         self.show_true = QtWidgets.QCheckBox("show true trajectory"); self.show_true.setChecked(True)
-        self.xy = pg.PlotWidget(title="Transverse view (B along z, out of page)", labels={"bottom": "x [m]", "left": "y [m]"})
-        self.rz = pg.PlotWidget(title="Longitudinal view", labels={"bottom": "z [m]", "left": "±r [m]"})
-        self.xy.setAspectLocked(True)
+        self.compare = QtWidgets.QCheckBox("compare simulation with CMS data")
+        self.compare.setToolTip("Show a simulated and a real CMS 2011 event of the selected resonance one above the other")
+        self.compare.setEnabled(cms.available())
+        save = QtWidgets.QPushButton("Save image")
+        save.setToolTip("Save the event views as a PNG")
+        self.view = EventView2D()
+        self.other = EventView2D(); self.other.hide()
+        self.xy, self.rz = self.view.xy, self.view.rz         # the primary view's plots
         self.feyn = FeynmanWidget()
         self.info = QtWidgets.QLabel(); self.info.setWordWrap(True)
         self.info.setStyleSheet("font-family: Consolas, monospace;")
         self.info.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
         top = QtWidgets.QHBoxLayout()
-        for w in (nxt, self.show_true):
+        for w in (nxt, self.show_true, self.compare, save):
             top.addWidget(w)
-        top.addWidget(QtWidgets.QLabel("  black dots: recorded hits · grey crosses: crossed but not recorded · "
-                                       "solid: reconstructed track · dashed: true trajectory"))
+        self.legend = QtWidgets.QLabel()
+        top.addWidget(self.legend)
         top.addStretch()
-        plots = QtWidgets.QHBoxLayout(); plots.addWidget(self.xy, 2); plots.addWidget(self.rz, 3)
+        self.bar = AnimationBar(self.clock)
+        views = QtWidgets.QVBoxLayout(); views.addWidget(self.view, 1); views.addWidget(self.other, 1)
         side = QtWidgets.QVBoxLayout(); side.addWidget(QtWidgets.QLabel("<b>Lowest-order diagram</b>"))
         self.contrast = QtWidgets.QLabel(DIAGRAM_VS_TRACKS); self.contrast.setWordWrap(True)
-        self.contrast.setStyleSheet("background:#fff8e1; border:1px solid #e0c060; padding:6px; font-size:9pt;")
         side.addWidget(self.feyn); side.addWidget(self.contrast); side.addWidget(self.info); side.addStretch()
-        body = QtWidgets.QHBoxLayout(); body.addLayout(plots, 4); body.addLayout(side, 1)
-        lay = QtWidgets.QVBoxLayout(self); lay.addLayout(top); lay.addLayout(body, 1)
+        self.body = QtWidgets.QWidget()
+        body = QtWidgets.QHBoxLayout(self.body); body.setContentsMargins(0, 0, 0, 0)
+        body.addLayout(views, 4); body.addLayout(side, 1)
+        lay = QtWidgets.QVBoxLayout(self); lay.addLayout(top); lay.addWidget(self.bar); lay.addWidget(self.body, 1)
         nxt.clicked.connect(lambda: self.main.new_event())
-        self.show_true.toggled.connect(lambda _: self.show_event(self.shown_event))
+        self.show_true.toggled.connect(self._true_toggled)
+        self.compare.toggled.connect(self._compare_toggled)
+        save.clicked.connect(self.save_image_dialog)
+        self.clock.frame.connect(self._frame)
+        self.theme_changed()
 
-    def draw_detector(self, geom):
-        t = np.linspace(0, 2 * np.pi, 240)
-        for c in geom.cylinders:
-            if c.group == "beam pipe":
-                continue
-            self.xy.plot(c.radius * np.cos(t), c.radius * np.sin(t), pen=pg.mkPen("#cccccc"))
-            for s in (1, -1):
-                self.rz.plot([-c.half_length, c.half_length], [s * c.radius] * 2, pen=pg.mkPen("#bbbbbb", width=1.5))
-        for d in geom.disks:
-            for sr in (1, -1):
-                self.rz.plot([d.z] * 2, [sr * d.r_min, sr * d.r_max], pen=pg.mkPen("#bbbbbb", width=1.5))
-        self.xy.addItem(pg.TextItem("⊙ B", color="#888", anchor=(0, 0)))
+    def _span(self):
+        return self.clock.t_max or None
 
     def show_event(self, ev):
         if ev is None:
             return
         self.shown_event = ev
+        if getattr(self.main, "clock", None) is None:      # standalone use: own clock
+            self.clock.set_span(ev.t_max)
         self.feyn.set_process(ev.process)
-        self.xy.clear(); self.rz.clear()
-        self.draw_detector(self.main.geometry)
-        for t in ev.tracks:
-            col = TRACK_COLORS[t.label]
-            side = np.sign(t.true_path[-1, 1]) or 1.0
-            r = lambda a: side * np.hypot(a[:, 0], a[:, 1])
-            if self.show_true.isChecked():
-                self.xy.plot(t.true_path[:, 0], t.true_path[:, 1], pen=pg.mkPen(col, width=1, style=QtCore.Qt.DashLine))
-                self.rz.plot(t.true_path[:, 2], r(t.true_path), pen=pg.mkPen(col, width=1, style=QtCore.Qt.DashLine))
-            self.xy.plot(t.reco_path[:, 0], t.reco_path[:, 1], pen=pg.mkPen(col, width=2))
-            self.rz.plot(t.reco_path[:, 2], r(t.reco_path), pen=pg.mkPen(col, width=2))
-            self.xy.plot(t.hits[:, 0], t.hits[:, 1], pen=None, symbol="o", symbolSize=5, symbolBrush="k")
-            self.rz.plot(t.hits[:, 2], r(t.hits), pen=None, symbol="o", symbolSize=5, symbolBrush="k")
-            if len(t.missed):
-                self.xy.plot(t.missed[:, 0], t.missed[:, 1], pen=None, symbol="x", symbolSize=8, symbolPen="#999")
-                self.rz.plot(t.missed[:, 2], r(t.missed), pen=None, symbol="x", symbolSize=8, symbolPen="#999")
-            o, d, L = momentum_arrow(t.p_reco, ev.vertex)
-            dt = d[:2] / max(np.linalg.norm(d[:2]), 1e-12)
-            self.xy.plot([o[0], o[0] + L * dt[0]], [o[1], o[1] + L * dt[1]], pen=pg.mkPen(col, width=4))
-        self.xy.setRange(xRange=(-1.25, 1.25), yRange=(-1.25, 1.25))
-        self.rz.setRange(xRange=(-3, 3), yRange=(-1.25, 1.25))
-        self.info.setText("\n".join(event_info_lines(ev)))
+        self.view.set_event(ev, getattr(self.main, "geometry", None), self.clock.fraction, self._span())
+        other = getattr(self.main, "companion", None) if self.compare.isChecked() else None
+        self.other.setVisible(other is not None)
+        if other is not None:
+            self.other.set_event(other, getattr(self.main, "companion_geometry", None), self.clock.fraction, self._span())
+        lines = event_info_lines(ev)
+        if other is not None:
+            lines += [""] + event_info_lines(other)
+        self.info.setText("\n".join(lines))
+
+    def _frame(self, f):
+        if self.isVisible():
+            for v in (self.view, self.other):
+                if v.ev is not None and not v.isHidden():
+                    v.set_progress(f, self._span())
+
+    def showEvent(self, e):
+        super().showEvent(e)
+        self._frame(self.clock.fraction)
+
+    def _true_toggled(self, on):
+        for v in (self.view, self.other):
+            v.show_true = on
+            v._apply()
+
+    def _compare_toggled(self, on):
+        if on and hasattr(self.main, "new_event"):
+            self.main.new_event()           # draws a matching companion event
+        elif not on:
+            self.other.hide()
+
+    def theme_changed(self):
+        th = theme.current()
+        self.contrast.setStyleSheet(f"background:{th['note_bg']}; color:{th['note_fg']}; border:1px solid "
+                                    f"{th['note_border']}; padding:6px; font-size:9pt;")
+        self.legend.setText(f"  dots: recorded hits · crosses: crossed, not recorded · solid: fitted track · "
+                            f"dashed: true trajectory · <span style='color:{th['flash']}'>●</span> hit just made")
+        for v in (self.view, self.other):
+            if v.ev is not None:
+                v.set_event(v.ev, v.geom, v.progress, v.span)
+        self.feyn.update()
+
+    def save_image(self, path):
+        self.body.grab().save(str(path), "PNG")
+        return path
+
+    def save_image_dialog(self):
+        ev = self.shown_event
+        name = "event2d.png" if ev is None else f"event2d_{'cms' if ev.is_data else 'sim'}_{ev.process}.png"
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save event views", name.replace("/", ""), "PNG (*.png)")
+        if path:
+            self.save_image(path)
 
 
 def resolution_scan(det, eta, progress=None):
@@ -578,7 +782,12 @@ class PerformanceTab(QtWidgets.QWidget):
         self.main.tasks.start(resolution_scan, self.show, self.main.setup.detector(), self.eta.value(),
                               text="Measuring resolution…")
 
+    def theme_changed(self):
+        if getattr(self, "last", None) is not None:
+            self.show(self.last)
+
     def show(self, r):
+        self.last = r
         pts, full, noms, det = r
         self.plot.clear(); self.eff_plot.clear()
         self.plot.plot(pts, 100 * full[:, 1], pen=pg.mkPen("#1f77b4", width=2), symbol="o", name="simulation (central 68%)")
@@ -587,7 +796,7 @@ class PerformanceTab(QtWidgets.QWidget):
         if all(np.isinf(b.half_length) for b in det.barrels):
             xx = np.logspace(np.log10(2), np.log10(250), 60)
             self.plot.plot(xx, 100 * gluckstern(xx, det), pen=pg.mkPen("#ff7f0e", width=2), name="Gluckstern formula")
-        self.eff_plot.plot(pts, full[:, 2], pen=pg.mkPen("k"), symbol="o")
+        self.eff_plot.plot(pts, full[:, 2], pen=pg.mkPen(fg()), symbol="o", symbolBrush=fg())
         self.eff_plot.setYRange(0, 1.05)
 
     def show_cutflow(self, sim):
@@ -657,23 +866,27 @@ class ExplorerTab(QtWidgets.QWidget):
         try:
             v = check(self.edit.text())
         except (KeyError, ValueError) as e:
-            self.out.setHtml(f"<p style='color:#b00'>{e}</p>")
+            self.out.setHtml(f"<p style='color:{theme.current()['bad']}'>{e}</p>")
             return
-        colour = "#080" if v.allowed else "#b00"
+        th = theme.current()
+        colour = th["ok"] if v.allowed else th["bad"]
         html = [f"<h3 style='color:{colour}'>{v.category}</h3><table cellpadding=3>",
                 "<tr><th align=left>law</th><th>kind</th><th>before</th><th>after</th><th>result</th></tr>"]
         for c in v.checks:
             fmt = (lambda x: f"{x:.4g}") if c.kind == "kinematic" else (lambda x: f"{x:+d}")
-            res = "ok" if c.passed else "<b style='color:#b00'>fails</b>"
+            res = "ok" if c.passed else f"<b style='color:{th['bad']}'>fails</b>"
             html.append(f"<tr><td>{c.law}</td><td>{c.kind}</td><td align=center>{fmt(c.before)}</td>"
                         f"<td align=center>{fmt(c.after)}</td><td>{res}</td></tr>")
-        html.append("</table><p style='color:#555'>exact: never violated · accidental: conserved in the "
+        html.append(f"</table><p style='color:{th['muted']}'>exact: never violated · accidental: conserved in the "
                     "Standard Model, never seen violated · approximate: lepton flavour (violated by neutrino "
                     "oscillations) · kinematic: energy–momentum. Passing all checks is necessary, not "
                     "sufficient: spin, parity, C and dynamics are not checked.</p>")
         g = self._gate
-        html.append(f"<p><b>Simulation:</b> <span style='color:{'#080' if g.simulable else '#b00'}'>{g.message}</span></p>")
+        html.append(f"<p><b>Simulation:</b> <span style='color:{th['ok'] if g.simulable else th['bad']}'>{g.message}</span></p>")
         self.out.setHtml("".join(html))
+
+    def theme_changed(self):
+        self.run_check()
 
     def use_process(self):
         g = self._gate
@@ -705,17 +918,25 @@ class ExplorerTab(QtWidgets.QWidget):
 
 # ---------------------------------------------------------------------------
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, settings: QtCore.QSettings | None = None):
         super().__init__()
         self.setWindowTitle("Particle Physics Lab: dimuon resonances")
+        self.settings = settings or QtCore.QSettings("particle-physics-lab", "desktop")
         self.tasks = TaskRunner(self)
         self.event_tasks = TaskRunner(self, report=False)
         self.last_sim = None
         self.current_event = None
         self.geometry = None
+        self.companion = None              # second event for the 2D comparison (data if the main one is simulated)
+        self.companion_geometry = None
         self._event_listeners = []
         self._data = None
+        self._display_events = None        # selected CMS events, loaded once for the event displays
+        self._event_again = None
+        self.clock = AnimationClock(self, autoplay=self.settings.value("animate_new_events", True, type=bool))
+        self.clock.autoplay_changed.connect(lambda on: self.settings.setValue("animate_new_events", on))
         self.setup = SetupPanel()
+        self.setup.source.currentIndexChanged.connect(lambda _: self.new_event())
         self.mass = MassTab(self)
         self.event2d = EventTab(self)
         self.performance = PerformanceTab(self)
@@ -741,29 +962,107 @@ class MainWindow(QtWidgets.QMainWindow):
         self.progress = QtWidgets.QProgressBar(); self.progress.setMaximumWidth(220); self.progress.hide()
         self.statusBar().addPermanentWidget(self.progress)
         self.set_status("Ready", busy=False)
+        self._build_menus()
         self.resize(1450, 860)
+        self.set_theme("dark" if self.settings.value("theme", "light") == "dark" else "light")
         self.new_event()
+
+    # ---- menus, theme, images ------------------------------------------------------
+    def _build_menus(self):
+        file_menu = self.menuBar().addMenu("&File")
+        save = file_menu.addAction("Save image of the current tab…")
+        save.setShortcut(QtGui.QKeySequence.Save)
+        save.triggered.connect(self.save_image_dialog)
+        file_menu.addSeparator()
+        file_menu.addAction("Quit", self.close)
+        view = self.menuBar().addMenu("&View")
+        self.dark_action = view.addAction("Dark theme")
+        self.dark_action.setCheckable(True)
+        self.dark_action.setShortcut("Ctrl+D")
+        self.dark_action.toggled.connect(lambda on: self.set_theme("dark" if on else "light"))
+        play = view.addAction("Play / pause event animation")
+        play.setShortcut("Ctrl+P")
+        play.triggered.connect(self.clock.toggle)
+
+    def set_theme(self, name: str):
+        app = QtWidgets.QApplication.instance()
+        theme.apply(app, self, name)
+        self.settings.setValue("theme", name)
+        if self.dark_action.isChecked() != (name == "dark"):
+            self.dark_action.blockSignals(True); self.dark_action.setChecked(name == "dark"); self.dark_action.blockSignals(False)
+
+    def save_image(self, path, widget=None):
+        """Save the current tab (or ``widget``) as a PNG; the 3D tab uses the renderer's own screenshot."""
+        w = widget or self.tabs.currentWidget()
+        if hasattr(w, "save_image"):
+            return w.save_image(path)
+        w.grab().save(str(path), "PNG")
+        return path
+
+    def save_image_dialog(self):
+        name = self.tabs.tabText(self.tabs.currentIndex()).lower().replace(" ", "_").replace("(", "").replace(")", "")
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save image", f"{name}.png", "PNG (*.png)")
+        if path:
+            self.save_image(path)
+            self.set_status(f"Saved {path}", busy=False)
+
+    def closeEvent(self, e):
+        self.clock.pause()
+        self.event3d.close_renderer()        # a tab's own closeEvent is not called when the window closes
+        super().closeEvent(e)
 
     # ---- shared display event ------------------------------------------------
     def add_event_listener(self, fn):
         self._event_listeners.append(fn)
 
+    def _events_for_display(self):
+        """Selected CMS events (loaded once, in the worker thread)."""
+        if self._display_events is None:
+            self._display_events = cms.load(check_file=False).events
+        return self._display_events
+
     def new_event(self, seed=None):
-        """Generate one display event with the current settings in a worker thread."""
+        """Generate the display event(s) with the current settings in a worker thread.
+
+        The main event follows the "Event displays" source; with the 2D comparison on,
+        a companion event of the other kind is made for the same resonance.
+        """
         det = self.setup.detector()
         name = self.setup.proc.currentData()
         rng = np.random.default_rng(seed)
+        have_data = cms.available()
+        source = self.setup.source.currentData() if have_data else "sim"
+        compare = self.event2d.compare.isChecked() and have_data
+        data_det = cms_inspired().with_(B=DATA_B)
 
         def job(progress=None):
-            return make_event(name, det, rng), det
-        return self.event_tasks.start(job, self._event_ready)
+            sim = make_event(name, det, rng) if (source == "sim" or compare) else None
+            dat = None
+            if source == "data" or compare:
+                dat = data_event(pick_data_row(self._events_for_display(), name, rng), name, data_det)
+            main_ev = dat if source == "data" else sim
+            other = (sim if source == "data" else dat) if compare else None
+            return main_ev, other, det, data_det
+
+        started = self.event_tasks.start(job, self._event_ready)
+        if not started:                     # one is running: make another when it finishes
+            self._event_again = (seed,)
+        return started
 
     def _event_ready(self, result):
-        ev, det = result
-        self.geometry = detector_geometry(det)
+        ev, other, det, data_det = result
+        geom = lambda e: None if e is None else detector_geometry(data_det if e.is_data else det)
+        self.geometry, self.companion, self.companion_geometry = geom(ev), other, geom(other)
         self.current_event = ev
+        self.clock.set_span(max(e.t_max for e in (ev, other) if e is not None))
+        if self.clock.autoplay:
+            self.clock.pause(); self.clock.fraction = 0.0
         for fn in self._event_listeners:
             fn(ev)
+        self.clock.new_event(self.clock.t_max)
+        if self._event_again is not None:
+            (seed,), self._event_again = self._event_again, None
+            QtCore.QTimer.singleShot(0, lambda: self.new_event(seed))
 
     def data_masses(self):
         if self._data is None and cms.available():
