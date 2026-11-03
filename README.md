@@ -28,6 +28,18 @@ python run_analysis.py
 python -m pytest
 ```
 
+**Optional speed-up.** Hit simulation and track fitting have a compiled version in `rust/` (Rust, PyO3). It gives the same results as the NumPy code and makes the GUI's mass plot about 10× faster (13–78× together with the GUI's pre-selection; `docs/validation/BASELINE_COMPARISON.md`). Without it everything runs in NumPy. To build it you need a Rust toolchain (https://rustup.rs) and maturin:
+
+```bash
+pip install maturin
+```
+
+```bash
+cd rust && maturin build --release && pip install --force-reinstall target/wheels/particlelab_fast-*.whl
+```
+
+Set `PARTICLELAB_BACKEND=numpy` to switch it off. On Windows without Visual Studio, install the GNU toolchain (`rustup-init --default-host x86_64-pc-windows-gnu --profile minimal`) and add `--target x86_64-pc-windows-gnu` to the build command.
+
 ## Contents
 
 | Path | What |
@@ -38,13 +50,14 @@ python -m pytest
 | `particlelab/analysis` | memory-bounded simulation pipeline, likelihood fitter and line shapes, toy MC, resolution studies, data–simulation comparison |
 | `particlelab/data` | CMS CSV ingestion: checksum, schema and row validation, selection with cut flow |
 | `particlelab/education` | learner logic: guided invariant-mass reconstruction from tracker measurements with diagnosed mistakes, and the conservation-law process gate |
-| `particlelab/visualization` | renderer-independent event-display data (detector shapes, true and reconstructed helices, hits, vertex, momentum arrows, flight times; display events from CMS open data) |
+| `particlelab/visualization` | renderer-independent event-display data (detector shapes, true and reconstructed helices, hits, vertex, momentum arrows, flight times; display events from CMS open data; a schematic outer detector that follows the muons to the muon chambers) |
 | `particlelab/app` | desktop GUI (PySide6, pyqtgraph) with animated 2D and PyVista 3D event displays, real CMS events beside simulated ones, light/dark themes, PNG export and a "Reconstruct it yourself" tab |
 | `run_analysis.py`, `configs/` | reproducible end-to-end analysis |
 | `references/` | digitised CMS reference curves (tracker material budget, single-muon resolution) with their provenance |
 | `calibration/` | fit of the detector material to the CMS material reference (never to the dimuon data) |
 | `audit/` | scripts and evidence of the independent audit (`docs/validation/FINAL_INDEPENDENT_AUDIT.md`) |
-| `benchmarks/bench.py` | throughput and memory benchmark |
+| `benchmarks/` | throughput and memory benchmark; speed and accuracy against a Delphes-style baseline (`compare_baselines.py`) |
+| `rust/` | optional compiled hit simulation and track fit (same results as NumPy, used automatically when installed) |
 | `tests/` | unit, property-based, integration, physics-validation and regression tests |
 
 ## Results at a glance

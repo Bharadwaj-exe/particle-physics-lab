@@ -71,8 +71,9 @@ def environment() -> dict:
             vers[pkg] = metadata.version(pkg)
         except metadata.PackageNotFoundError:
             vers[pkg] = None
+    from .detector import _backend
     return {"particlelab": __version__, "python": sys.version.split()[0], "platform": platform.platform(),
-            "packages": vers, "git": _git()}
+            "packages": vers, "detector_backend": _backend.active(), "git": _git()}
 
 
 def _jsonable(o):

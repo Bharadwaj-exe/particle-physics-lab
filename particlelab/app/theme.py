@@ -60,10 +60,14 @@ def style_plot(w: pg.PlotWidget, t: dict | None = None):
     for name in ("left", "bottom", "right", "top"):
         ax = item.getAxis(name)
         ax.setPen(t["fg"]); ax.setTextPen(t["fg"])
+        ax.enableAutoSIPrefix(False)        # axes carry their units; no automatic ×0.001 rescaling
     if item.titleLabel.text:
         item.setTitle(item.titleLabel.text, color=t["fg"])
     if item.legend is not None:
         item.legend.setLabelTextColor(t["fg"])
+        bg = QtGui.QColor(t["bg"]); bg.setAlpha(215)
+        item.legend.setBrush(pg.mkBrush(bg))
+        item.legend.setPen(pg.mkPen(t["grid"]))
 
 
 def apply(app: QtWidgets.QApplication, window: QtWidgets.QWidget | None, name: str):

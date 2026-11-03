@@ -20,6 +20,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from ..units import C_TRACK
+from . import _backend
 from .geometry import DetectorConfig
 from .simulation import Hits
 
@@ -68,6 +69,18 @@ def _pinv(M):
 
 
 def fit_tracks(h: Hits, det: DetectorConfig, iterations: int = 6) -> TrackFit:
+    """Fit every track; uses the compiled kernel when installed (same algorithm)."""
+    if _backend.active() == "rust":
+        c = np.ascontiguousarray
+        out = _backend.fast.fit_tracks(c(h.x, float), c(h.y, float), c(h.z, float), c(h.detected, bool),
+                                       c(h.sigma_rphi, float), c(h.sigma_long, float), c(h.is_disk, bool),
+                                       C_TRACK * det.B, float(det.beamspot_constraint), int(det.min_hits),
+                                       int(iterations))
+        return TrackFit(*out)
+    return _fit_tracks_numpy(h, det, iterations)
+
+
+def _fit_tracks_numpy(h: Hits, det: DetectorConfig, iterations: int = 6) -> TrackFit:
     n = h.x.shape[0]
     nh = h.n_detected
     ok = nh >= max(det.min_hits, 3)

@@ -6,7 +6,8 @@
 particle-physics-lab/
 ├── gui.py                      entry point → particlelab.app.desktop
 ├── run_analysis.py             full reproducible analysis (config → figures, tables, run record)
-├── benchmarks/bench.py         performance benchmark
+├── benchmarks/                 performance benchmark; speed and accuracy against a Delphes-style baseline
+├── rust/                       optional compiled kernels (hit simulation, track fit) used when installed
 ├── configs/                    run configurations (JSON)
 ├── data/raw/                   downloaded CMS file + provenance JSON (never modified)
 ├── references/                 digitised CMS reference curves (material budget, muon resolution) with provenance
@@ -23,7 +24,8 @@ particle-physics-lab/
 │   ├── visualization/          renderer-independent display data (event geometry, tracks, hits)
 │   ├── education/              learner logic without GUI: guided mass reconstruction with diagnosed mistakes, process gate
 │   └── app/                    desktop interface (PySide6/pyqtgraph; 3D view with PyVista/VTK;
-│                               shared animation clock in animation.py, light/dark themes in theme.py)
+│                               shared animation clock in animation.py, light/dark themes in theme.py,
+│                               font-relative sizes, responsive panes and bounded plot views in layout.py)
 └── tests/                      unit · integration · physics_validation · regression
 ```
 

@@ -1,0 +1,459 @@
+{
+  "environment": {
+    "particlelab": "0.2.0",
+    "python": "3.11.8",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.3.5",
+      "scipy": "1.17.1",
+      "pandas": "3.0.5",
+      "matplotlib": "3.10.8",
+      "PySide6": "6.12.0",
+      "pyqtgraph": "0.14.0",
+      "pyvista": "0.49.2",
+      "pyvistaqt": "0.13.2",
+      "vtk": "9.7.1"
+    },
+    "git": {
+      "commit": "d37973eb924de842f01eddaa98b2f98018410f19",
+      "dirty": true,
+      "changed_files": [
+        "?? benchmarks/compare_baselines.py"
+      ]
+    }
+  },
+  "delphes_card": "delphes/cards/delphes_card_CMS.tcl (master), MuonMomentumSmearing + MuonTrackingEfficiency",
+  "preselection_margins": [
+    0.8,
+    0.1
+  ],
+  "profile": {
+    "J/psi": {
+      "events": 100000,
+      "seconds": {
+        "generate": 0.17754159998730756,
+        "hits": 10.993763100006618,
+        "track fits": 9.64743610000005,
+        "selection + mass": 0.07471960000111721
+      },
+      "total_seconds": 20.893460399995092,
+      "events_per_s": 4786.186590710627,
+      "share": {
+        "generate": 0.008497472251525615,
+        "hits": 0.5261820153070097,
+        "track fits": 0.4617442929655787,
+        "selection + mass": 0.0035762194758860895
+      },
+      "selected": 1173,
+      "preselection": {
+        "kept_fraction": 0.02859,
+        "selected_events_lost": 0,
+        "selected_events": 1173,
+        "seconds": 0.6088776999968104,
+        "speedup": 34.3147078635078
+      }
+    },
+    "Upsilon(1S)": {
+      "events": 100000,
+      "seconds": {
+        "generate": 0.13628710000193678,
+        "hits": 8.112078599981032,
+        "track fits": 8.903037499985658,
+        "selection + mass": 0.07650429999921471
+      },
+      "total_seconds": 17.22790749996784,
+      "events_per_s": 5804.535460861202,
+      "share": {
+        "generate": 0.007910833048191788,
+        "hits": 0.470868478948832,
+        "track fits": 0.5167799687804382,
+        "selection + mass": 0.004440719222538054
+      },
+      "selected": 30420,
+      "preselection": {
+        "kept_fraction": 0.40096,
+        "selected_events_lost": 0,
+        "selected_events": 30420,
+        "seconds": 7.9877064999891445,
+        "speedup": 2.1568027693545395
+      }
+    },
+    "Z": {
+      "events": 100000,
+      "seconds": {
+        "generate": 0.5314356999879237,
+        "hits": 9.071887099999003,
+        "track fits": 9.936161299992818,
+        "selection + mass": 0.08423390000825748
+      },
+      "total_seconds": 19.623717999988003,
+      "events_per_s": 5095.874288453449,
+      "share": {
+        "generate": 0.027081295195347212,
+        "hits": 0.4622919622063744,
+        "track fits": 0.506334288945596,
+        "selection + mass": 0.00429245365268238
+      },
+      "selected": 57098,
+      "preselection": {
+        "kept_fraction": 0.60517,
+        "selected_events_lost": 0,
+        "selected_events": 57098,
+        "seconds": 13.461203999991994,
+        "speedup": 1.457798128607194
+      }
+    }
+  },
+  "latency": {
+    "J/psi": {
+      "events": 100000,
+      "selected": 1215,
+      "simulate_s": 20.62838599999668,
+      "fit_s": 0.26117660000454634,
+      "total_s": 20.889562600001227
+    },
+    "Upsilon(1S)": {
+      "events": 100000,
+      "selected": 30370,
+      "simulate_s": 18.376313800021308,
+      "fit_s": 0.24107579997507855,
+      "total_s": 18.617389599996386
+    },
+    "Z": {
+      "events": 100000,
+      "selected": 56954,
+      "simulate_s": 20.663615099998424,
+      "fit_s": 0.13474420001148246,
+      "total_s": 20.798359300009906
+    }
+  },
+  "accuracy": {
+    "J/psi": {
+      "delphes_muon_id_keeps_fraction_of_selected": 0.004181600955794504,
+      "seconds": {
+        "this simulation": 193.2069482000079,
+        "delphes-style": 3.936818400019547
+      },
+      "events_per_s": {
+        "this simulation": 5175.797295679034,
+        "delphes-style": 254012.2246926693
+      },
+      "regions": {
+        "all": {
+          "data": {
+            "fwhm_MeV": 62.01643722437744,
+            "sigma_MeV": 26.336180237972414,
+            "sigma_err_MeV": 0.7539131249786452,
+            "mass": 3.0933108182716285,
+            "pvalue": 0.23857988828962295,
+            "converged": true
+          },
+          "this simulation": {
+            "fwhm_MeV": 66.06282792052065,
+            "sigma_MeV": 28.054538780584615,
+            "sigma_err_MeV": 0.5331304344090755,
+            "mass": 3.098074605903294,
+            "pvalue": 0.5272624260811337,
+            "converged": true,
+            "sigma_ratio_to_data": 1.0652470679910753,
+            "ratio_err_from_data": 0.03049431385442708,
+            "pulls_from_data": 2.139647027395007
+          },
+          "delphes-style": {
+            "fwhm_MeV": 76.89774358799318,
+            "sigma_MeV": 32.65574298793663,
+            "sigma_err_MeV": 0.5498448076027117,
+            "mass": 3.0981578065417006,
+            "pvalue": 0.14720771966135826,
+            "converged": true,
+            "sigma_ratio_to_data": 1.239957453695295,
+            "ratio_err_from_data": 0.035495663771625,
+            "pulls_from_data": 6.760190631710781
+          }
+        },
+        "central (both |eta| < 0.9)": {
+          "data": {
+            "fwhm_MeV": 49.02233746782603,
+            "sigma_MeV": 20.818047166564476,
+            "sigma_err_MeV": 0.7166589694016626,
+            "mass": 3.0941311579398443,
+            "pvalue": 0.02223459514614438,
+            "converged": false
+          },
+          "this simulation": {
+            "fwhm_MeV": 49.23173044597995,
+            "sigma_MeV": 20.90696893408355,
+            "sigma_err_MeV": 0.4892531349483377,
+            "mass": 3.0976026051893735,
+            "pvalue": 0.9999995847061439,
+            "converged": true,
+            "sigma_ratio_to_data": 1.0042713789054092,
+            "ratio_err_from_data": 0.03457193105806138,
+            "pulls_from_data": 0.12355048661400118
+          },
+          "delphes-style": {
+            "fwhm_MeV": 56.59671753076534,
+            "sigma_MeV": 24.034617602669158,
+            "sigma_err_MeV": 0.8805612549796864,
+            "mass": 3.0974036844831287,
+            "pvalue": 0.9990364255012303,
+            "converged": true,
+            "sigma_ratio_to_data": 1.1545087495656539,
+            "ratio_err_from_data": 0.03974383591357117,
+            "pulls_from_data": 3.887615425487764
+          }
+        },
+        "forward (both |eta| > 1.2)": {
+          "data": {
+            "fwhm_MeV": 97.14336801611267,
+            "sigma_MeV": 41.25334126724676,
+            "sigma_err_MeV": 1.9245597388276339,
+            "mass": 3.0920220447354447,
+            "pvalue": 0.039781876854782676,
+            "converged": false
+          },
+          "this simulation": {
+            "fwhm_MeV": 98.65740481408425,
+            "sigma_MeV": 41.896298969799666,
+            "sigma_err_MeV": 0.9143461443662823,
+            "mass": 3.098985439702814,
+            "pvalue": 0.7974198863860211,
+            "converged": true,
+            "sigma_ratio_to_data": 1.0155855909558382,
+            "ratio_err_from_data": 0.04737931715700571,
+            "pulls_from_data": 0.3289534736051736
+          },
+          "delphes-style": {
+            "fwhm_MeV": 116.85587918366159,
+            "sigma_MeV": 49.62454526229896,
+            "sigma_err_MeV": 0.6125489718501399,
+            "mass": 3.0985314215121518,
+            "pvalue": 0.0326488306558055,
+            "converged": true,
+            "sigma_ratio_to_data": 1.2029218419138947,
+            "ratio_err_from_data": 0.05611896818020749,
+            "pulls_from_data": 3.615922539100833
+          }
+        }
+      }
+    },
+    "Upsilon(1S)": {
+      "delphes_muon_id_keeps_fraction_of_selected": 0.0029907050247242944,
+      "seconds": {
+        "this simulation": 36.8966717000003,
+        "delphes-style": 0.8518173000193201
+      },
+      "events_per_s": {
+        "this simulation": 5420.543121779691,
+        "delphes-style": 234792.13206337063
+      },
+      "regions": {
+        "all": {
+          "data": {
+            "fwhm_MeV": 214.19587106775495,
+            "sigma_MeV": 90.96138570908568,
+            "sigma_err_MeV": 3.496640254785342,
+            "mass": 9.44390434179264,
+            "pvalue": 0.23304133838491622,
+            "converged": true
+          },
+          "this simulation": {
+            "fwhm_MeV": 204.50452595513724,
+            "sigma_MeV": 86.84581533681725,
+            "sigma_err_MeV": 0.7315652048178084,
+            "mass": 9.462425885708619,
+            "pvalue": 0.0020302072970327027,
+            "converged": true,
+            "sigma_ratio_to_data": 0.9547547529076689,
+            "ratio_err_from_data": 0.03670166056112674,
+            "pulls_from_data": -1.232784740542598
+          },
+          "delphes-style": {
+            "fwhm_MeV": 232.17853264645072,
+            "sigma_MeV": 98.5979839674073,
+            "sigma_err_MeV": 0.8103292183523502,
+            "mass": 9.461420544854107,
+            "pvalue": 0.029854412431317204,
+            "converged": true,
+            "sigma_ratio_to_data": 1.0839542867425649,
+            "ratio_err_from_data": 0.041668210788840275,
+            "pulls_from_data": 2.014828214439431
+          }
+        },
+        "central (both |eta| < 0.9)": {
+          "data": {
+            "fwhm_MeV": 158.07429213461077,
+            "sigma_MeV": 67.12854260854883,
+            "sigma_err_MeV": 3.450459456862615,
+            "mass": 9.445116250236726,
+            "pvalue": 0.6611270310339405,
+            "converged": true
+          },
+          "this simulation": {
+            "fwhm_MeV": 152.66786110975693,
+            "sigma_MeV": 64.83262319931923,
+            "sigma_err_MeV": 0.6880299191983179,
+            "mass": 9.461671556840148,
+            "pvalue": 0.7923653105076751,
+            "converged": true,
+            "sigma_ratio_to_data": 0.9657981639402192,
+            "ratio_err_from_data": 0.04964277904289988,
+            "pulls_from_data": -0.688958932581605
+          },
+          "delphes-style": {
+            "fwhm_MeV": 186.04534813148632,
+            "sigma_MeV": 79.00685753842633,
+            "sigma_err_MeV": 0.9233048671617967,
+            "mass": 9.46056072928344,
+            "pvalue": 0.20891481121759758,
+            "converged": true,
+            "sigma_ratio_to_data": 1.1769487980566526,
+            "ratio_err_from_data": 0.06049608635448753,
+            "pulls_from_data": 2.9249627326268652
+          }
+        },
+        "forward (both |eta| > 1.2)": {
+          "data": {
+            "fwhm_MeV": 323.92304156214993,
+            "sigma_MeV": 137.5586213530448,
+            "sigma_err_MeV": 15.817615541605084,
+            "mass": 9.420200678115066,
+            "pvalue": 0.037214761473151725,
+            "converged": true
+          },
+          "this simulation": {
+            "fwhm_MeV": 307.61045852658066,
+            "sigma_MeV": 130.6312461893072,
+            "sigma_err_MeV": 1.2201076078331095,
+            "mass": 9.463506817309726,
+            "pvalue": 0.10955065038243547,
+            "converged": false,
+            "sigma_ratio_to_data": 0.9496405598166148,
+            "ratio_err_from_data": 0.10919743982707017,
+            "pulls_from_data": -0.4611778468720204
+          },
+          "delphes-style": {
+            "fwhm_MeV": 353.04064592278905,
+            "sigma_MeV": 149.923834687782,
+            "sigma_err_MeV": 5.66981572507644,
+            "mass": 9.461364808950142,
+            "pvalue": 0.0338599732591453,
+            "converged": true,
+            "sigma_ratio_to_data": 1.0898905005961192,
+            "ratio_err_from_data": 0.1253245252918881,
+            "pulls_from_data": 0.7172618478845945
+          }
+        }
+      }
+    },
+    "Z": {
+      "delphes_muon_id_keeps_fraction_of_selected": 0.9955225490901244,
+      "seconds": {
+        "this simulation": 18.99433030001819,
+        "delphes-style": 0.7819731000054162
+      },
+      "events_per_s": {
+        "this simulation": 5264.728917549898,
+        "delphes-style": 127881.63684825906
+      },
+      "regions": {
+        "all": {
+          "data": {
+            "fwhm_MeV": 4380.607252069751,
+            "sigma_MeV": 1116.1200834215572,
+            "sigma_err_MeV": 92.16459375140572,
+            "mass": 90.91453150268755,
+            "pvalue": 0.6296356144491776,
+            "converged": true
+          },
+          "this simulation": {
+            "fwhm_MeV": 4097.531927077711,
+            "sigma_MeV": 1064.6544951149529,
+            "sigma_err_MeV": 14.60065746325172,
+            "mass": 91.19294633338941,
+            "pvalue": 0.04424096315515055,
+            "converged": true,
+            "sigma_ratio_to_data": 0.9538888430814431,
+            "ratio_err_from_data": 0.07876820694516101,
+            "pulls_from_data": -0.5854031557511504
+          },
+          "delphes-style": {
+            "fwhm_MeV": 4466.009806640628,
+            "sigma_MeV": 1235.0573961693324,
+            "sigma_err_MeV": 14.743013984003158,
+            "mass": 91.16625623938492,
+            "pvalue": 0.04149669936277205,
+            "converged": true,
+            "sigma_ratio_to_data": 1.106563186626983,
+            "ratio_err_from_data": 0.09137542462553903,
+            "pulls_from_data": 1.1662127652340233
+          }
+        },
+        "central (both |eta| < 0.9)": {
+          "data": {
+            "fwhm_MeV": 4009.532299475822,
+            "sigma_MeV": 916.5115556152916,
+            "sigma_err_MeV": 170.94083018874477,
+            "mass": 90.97947961159542,
+            "pvalue": 0.28615131602443294,
+            "converged": false
+          },
+          "this simulation": {
+            "fwhm_MeV": 3287.7930028105593,
+            "sigma_MeV": 666.9061037585467,
+            "sigma_err_MeV": 37.341776955854705,
+            "mass": 91.19144943355668,
+            "pvalue": 0.15994333331404834,
+            "converged": true,
+            "sigma_ratio_to_data": 0.7276570597201313,
+            "ratio_err_from_data": 0.13571711247847243,
+            "pulls_from_data": -2.006695657653842
+          },
+          "delphes-style": {
+            "fwhm_MeV": 3694.1054203215626,
+            "sigma_MeV": 872.2239830802363,
+            "sigma_err_MeV": 34.20597019688137,
+            "mass": 91.1388315869337,
+            "pvalue": 0.7766644872946336,
+            "converged": true,
+            "sigma_ratio_to_data": 0.9516781078604915,
+            "ratio_err_from_data": 0.17749983056232393,
+            "pulls_from_data": -0.2722362719244496
+          }
+        },
+        "forward (both |eta| > 1.2)": {
+          "data": {
+            "fwhm_MeV": 5137.911749944522,
+            "sigma_MeV": 1511.5107388136694,
+            "sigma_err_MeV": 135.11124726955669,
+            "mass": 90.81180625216403,
+            "pvalue": 0.573987897856956,
+            "converged": false
+          },
+          "this simulation": {
+            "fwhm_MeV": 4850.883891228421,
+            "sigma_MeV": 1409.3964629941322,
+            "sigma_err_MeV": 32.71248129072857,
+            "mass": 91.2078658773622,
+            "pvalue": 0.10254534795431544,
+            "converged": true,
+            "sigma_ratio_to_data": 0.9324422425872522,
+            "ratio_err_from_data": 0.08334934788598729,
+            "pulls_from_data": -0.8105373242410894
+          },
+          "delphes-style": {
+            "fwhm_MeV": 5508.821178915681,
+            "sigma_MeV": 1702.777956899008,
+            "sigma_err_MeV": 33.85132109878041,
+            "mass": 91.1589857969766,
+            "pvalue": 0.3578756804854514,
+            "converged": true,
+            "sigma_ratio_to_data": 1.1265404295013195,
+            "ratio_err_from_data": 0.10069943839695654,
+            "pulls_from_data": 1.2566150468734287
+          }
+        }
+      }
+    }
+  }
+}

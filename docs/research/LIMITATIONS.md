@@ -14,6 +14,7 @@ The project is a transparent, testable **educational simulation**. Every step ha
 | Tracking | ideal hit-to-track assignment; no fakes; scattering-agnostic weights | efficiency and resolution optimistic |
 | Muon ID | no calorimeter or muon-system simulation; muons = tracks passing pT and η cuts | real muon-ID thresholds (p ≳ 3 GeV barrel, lower forward) are approximated by the pT cut |
 | Trigger | not simulated; the data come from DoubleMu-triggered events | data pT spectra are shaped by trigger thresholds that the simulation does not have |
+| Outer detector (display) | schematic CMS-like calorimeters, coil, yoke and muon stations: axial field only (no endcap return field), average minimum-ionising energy loss (no fluctuations, no radiative loss, no rise at low momentum), no multiple scattering outside the tracker | shows which muons reach the muon system and the S-bend qualitatively; not used by any result |
 | Data event display | the CMS file has momenta and charges only: drawn helices start at the origin and have no scattering or energy loss; the points on them are computed layer crossings, not CMS hits; events in the display windows include some background | the picture of a real event is schematic; its mass and momenta are exact |
 | Calibration | no momentum-scale correction in simulation or data | data peaks sit below PDG (J/ψ −3.6 MeV, Υ −16.5 MeV, Z −0.27 GeV), more so in the forward region |
 

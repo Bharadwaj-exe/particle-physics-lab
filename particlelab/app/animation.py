@@ -93,16 +93,20 @@ class AnimationBar(QtWidgets.QWidget):
         self.clock = clock
         self.restart_btn = QtWidgets.QToolButton(); self.restart_btn.setText("⏮"); self.restart_btn.setToolTip("Replay from the collision")
         self.play_btn = QtWidgets.QToolButton(); self.play_btn.setToolTip("Play / pause the event (Ctrl+P)")
-        self.play_btn.setMinimumWidth(34)
+        fm = self.fontMetrics()
+        self.play_btn.setMinimumWidth(fm.height() * 2)
         self.slider = QtWidgets.QSlider(QtCore.Qt.Horizontal); self.slider.setRange(0, 1000)
         self.slider.setToolTip("Time after the collision")
-        self.time_label = QtWidgets.QLabel(); self.time_label.setMinimumWidth(150)
+        self.slider.setMinimumWidth(fm.height() * 4)
+        self.time_label = QtWidgets.QLabel()
+        self.time_label.setMinimumWidth(fm.horizontalAdvance("t = 88.88 ns (fitted)") + 4)
         self.speed = QtWidgets.QComboBox()
         for text, v in SPEEDS:
             self.speed.addItem(text, v)
         self.speed.setCurrentIndex(2)
         self.speed.setToolTip("Playback speed")
-        self.auto = QtWidgets.QCheckBox("animate new events"); self.auto.setChecked(clock.autoplay)
+        self.auto = QtWidgets.QCheckBox("auto-play"); self.auto.setChecked(clock.autoplay)
+        self.auto.setToolTip("Animate every new event automatically")
         lay = QtWidgets.QHBoxLayout(self); lay.setContentsMargins(0, 0, 0, 0)
         for w in (self.restart_btn, self.play_btn):
             lay.addWidget(w)
@@ -134,7 +138,9 @@ class AnimationBar(QtWidgets.QWidget):
         self.slider.setValue(round(1000 * f))
         self.slider.blockSignals(False)
         t = self.clock.time_ns()
-        self.time_label.setText(f"t = {t:5.2f} ns" + ("  (tracks fitted)" if f >= 1.0 else ""))
+        self.time_label.setText(f"t = {t:5.2f} ns" + (" (fitted)" if f >= 1.0 else ""))
+        self.time_label.setToolTip("Time after the collision" + ("; both muons have left and the tracks are fitted"
+                                                                 if f >= 1.0 else ""))
 
     def _state(self, playing):
         self.play_btn.setText("⏸" if playing else "▶")

@@ -70,3 +70,52 @@ def test_run_analysis_logging_survives_a_non_utf8_redirect():
     p = subprocess.run([sys.executable, "-c", code], cwd=root, env=env, capture_output=True)
     assert p.returncode == 0, p.stderr.decode("cp1252", "replace")
     assert b"J/psi" in p.stdout
+
+
+# ---- pre-selection (events whose true muons cannot pass the cuts are skipped) ----------
+
+def _selected_true_muons(name, det, n, seed):
+    """Full chain on n events; true momenta of the selected events."""
+    from particlelab.analysis.pipeline import _detector_chain
+    from particlelab.physics import generate
+    rng = np.random.default_rng(seed)
+    ev = generate(name, n, seed=rng)
+    zv = rng.normal(0, det.vertex_sigma_z, n)
+    sel = _detector_chain(ev.mu_minus, ev.mu_plus, zv, det, rng)[-1]
+    return ev.mu_minus[sel], ev.mu_plus[sel]
+
+
+@pytest.mark.parametrize("label", ["default", "B 0.5 T, resolution x20, material x10",
+                                   "same with pT cut 0.5 GeV", "resolution x20, eta cut 1.0"])
+def test_preselection_never_drops_a_selectable_event_at_extreme_settings(label):
+    from particlelab.analysis.pipeline import preselection_cuts
+    from particlelab.detector import cms_inspired
+    from particlelab.physics import pt_eta_phi
+    b = cms_inspired()
+    det = {"default": b,
+           "B 0.5 T, resolution x20, material x10": b.with_(B=0.5).scaled_resolution(20).scaled_material(10),
+           "same with pT cut 0.5 GeV": b.with_(B=0.5, pt_min=0.5).scaled_resolution(20).scaled_material(10),
+           "resolution x20, eta cut 1.0": b.with_(eta_max=1.0).scaled_resolution(20)}[label]
+    pt_cut, eta_cut = preselection_cuts(det)
+    for name in ("J/psi", "Upsilon(1S)"):
+        for p in _selected_true_muons(name, det, 15000, 11):
+            pt, eta, _ = pt_eta_phi(p)
+            assert len(pt) > 50
+            assert np.all(pt > pt_cut) and np.all(np.abs(eta) < eta_cut), (label, name)
+
+
+def test_preselected_run_matches_full_run_statistically():
+    full = simulate("Upsilon(1S)", 30000, seed=8)
+    pre = simulate("Upsilon(1S)", 30000, seed=8, preselect=True)
+    assert pre.preselection["checked"] > 0 and pre.preselection["checked_selected"] == 0
+    flow = list(pre.cutflow.values())
+    assert flow[0] == 30000 and flow == sorted(flow, reverse=True) and flow[-1] == pre.reco_mass.size
+    # same physics: selected counts within 3 binomial sigma, peak mean and spread within errors
+    n1, n2 = full.reco_mass.size, pre.reco_mass.size
+    assert abs(n1 - n2) < 3 * np.sqrt(2 * n1 * (1 - n1 / 30000))
+    core = lambda m: m[(m > 9.0) & (m < 9.9)]
+    a, c = core(full.reco_mass), core(pre.reco_mass)
+    assert abs(a.mean() - c.mean()) < 4 * a.std() / np.sqrt(len(a))
+    assert abs(a.std() / c.std() - 1) < 0.05
+    # without pre-selection nothing changed
+    assert full.preselection is None and "true muons can pass the cuts (pre-selection)" not in full.cutflow

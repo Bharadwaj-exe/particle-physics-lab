@@ -26,6 +26,7 @@ import numpy as np
 
 from ..units import C_TRACK, HIGHLAND_E0
 from ..physics.kinematics import M_MU
+from . import _backend
 from .geometry import INF, DetectorConfig, PassiveCylinder
 
 
@@ -72,8 +73,49 @@ def surfaces(det: DetectorConfig):
     return rows
 
 
+def surface_table(det: DetectorConfig) -> np.ndarray:
+    """surfaces(det) as a float array for the compiled kernel:
+    (is_disk, r, |z|_max, z_disk, r_min, r_max, σ1, σ2, x/X0, |z|_min, sensitive)."""
+    return np.array([[kind == "d", r, hl, zd, rr[0] if kind == "d" else 0.0, rr[1] if kind == "d" else 0.0,
+                      s1, s2, xx, zmin, sensitive]
+                     for kind, r, hl, zd, rr, s1, s2, xx, _, zmin, sensitive in surfaces(det)], float).reshape(-1, 11)
+
+
 def simulate_hits(p: np.ndarray, q: np.ndarray, det: DetectorConfig, rng: np.random.Generator,
                   z_vertex: np.ndarray | None = None) -> Hits:
+    """Hits of tracks with momenta p (n,3 or n,4) and charges q, starting at (0, 0, z_vertex).
+    Uses the compiled kernel when installed; it draws the same random numbers as the NumPy code."""
+    if _backend.active() == "rust":
+        return _simulate_hits_fast(p, q, det, rng, z_vertex)
+    return _simulate_hits_numpy(p, q, det, rng, z_vertex)
+
+
+def _simulate_hits_fast(p, q, det, rng, z_vertex):
+    f = _backend.fast
+    p = np.ascontiguousarray(np.atleast_2d(p)[:, -3:], dtype=float)
+    n = len(p)
+    q = np.ascontiguousarray(np.broadcast_to(np.asarray(q, float), (n,)))
+    z0 = np.zeros(n) if z_vertex is None else np.ascontiguousarray(np.broadcast_to(np.asarray(z_vertex, float), (n,)))
+    table = surface_table(det)
+    cb = C_TRACK * det.B
+    S = max(f.count_crossings(p, q, z0, table, cb), 1)
+    empty = np.empty((0, 0), np.float32)
+    th1 = th2 = ga = gl = u = empty
+    if det.multiple_scattering:       # same draws, in the same order, as the NumPy code
+        th = rng.standard_normal(size=(2, n, S), dtype=np.float32)
+        th1, th2 = th[0], th[1]
+    if det.smear:
+        ga = rng.standard_normal(size=(n, S), dtype=np.float32)
+        gl = rng.standard_normal(size=(n, S), dtype=np.float32)
+    if det.hit_efficiency < 1:
+        u = rng.random(size=(n, S), dtype=np.float32)
+    out = f.simulate_hits(p, q, z0, table, cb, HIGHLAND_E0, M_MU, S, bool(det.multiple_scattering), bool(det.smear),
+                          float(det.hit_efficiency), th1, th2, ga, gl, u)
+    return Hits(*out)
+
+
+def _simulate_hits_numpy(p: np.ndarray, q: np.ndarray, det: DetectorConfig, rng: np.random.Generator,
+                         z_vertex: np.ndarray | None = None) -> Hits:
     p = np.atleast_2d(p)[:, -3:]
     n = len(p)
     pt = np.hypot(p[:, 0], p[:, 1])
@@ -115,7 +157,7 @@ def simulate_hits(p: np.ndarray, q: np.ndarray, det: DetectorConfig, rng: np.ran
     s, crossed, sig1, sig2, x0, disk, sens = map(take, (s, crossed, sig1, sig2, x0, disk, sens))
     surf = order
     # crossed surfaces are now first; drop columns that no track uses
-    smax = max(int(crossed.sum(1).max()), 1)
+    smax = max(int(crossed.sum(1).max(initial=0)), 1)
     s, crossed, sig1, sig2, x0, disk, surf, sens = (a[:, :smax] for a in (s, crossed, sig1, sig2, x0, disk, surf, sens))
     S = smax
     sf = np.where(crossed, s, 0.0)

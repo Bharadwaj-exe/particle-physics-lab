@@ -9,8 +9,11 @@ VTK objects themselves are created on the GUI thread, as Qt requires.
 
 Animation: the shared clock gives a fraction of the event's flight time. While the
 muons fly, the path flown so far and each muon's position are drawn and hits appear
-when their surface is crossed; the fitted tracks and momentum arrows appear at the
-end. Frames update existing VTK data in place instead of rebuilding actors.
+when their surface is crossed; the fitted tracks and momentum arrows appear when both
+muons have left the tracker. With the outer detector shown, the muons then cross the
+calorimeters, the coil and the return yoke (drawn cut away), muon-chamber hits light up
+as each station is crossed, and a muon that runs out of energy is marked where it stops.
+Frames update existing VTK data in place instead of rebuilding actors.
 """
 from __future__ import annotations
 
@@ -30,7 +33,8 @@ from .animation import AnimationBar, AnimationClock  # noqa: E402
 
 DETECTOR_GROUPS = ("beam pipe", "pixel barrel", "strip barrel", "pixel disks", "inner disks", "endcap disks", "beam axis")
 EVENT_GROUPS = ("true tracks", "reconstructed tracks", "hits", "missed hits", "layer crossings", "vertex",
-                "momentum vectors")
+                "momentum vectors", "muons outside the tracker", "muon chamber hits")
+OUTER_GROUPS = ("calorimeters", "solenoid", "return yoke", "muon chambers")   # schematic, display only
 FLIGHT = "muons in flight"          # animation only: the path flown so far and each muon's position
 STYLE = {
     "beam pipe": dict(color="#90a4ae", opacity=0.35),
@@ -40,6 +44,37 @@ STYLE = {
     "inner disks": dict(color="#c8a165", opacity=0.07),
     "endcap disks": dict(color="#c8a165", opacity=0.05),
 }
+# outer detector: colours as in the usual CMS drawings (ECAL green, HCAL amber, coil grey, iron red)
+# faint faces plus clear outlines, as in collider event displays: stacked translucent
+# faces alone turn into a haze in which the muons disappear
+OUTER_STYLE = {
+    "ECAL": dict(color="#2e9e5b", opacity=0.10, edge=0.9),
+    "HCAL": dict(color="#d9a227", opacity=0.07, edge=0.8),
+    "solenoid": dict(color="#8e9aa4", opacity=0.10, edge=0.8),
+    "yoke": dict(color="#c0392b", opacity=0.025, edge=0.75),       # many layers: outlines carry them
+    "chambers": dict(color="#6d7b86", opacity=0.03, edge=0.8),
+}
+CUT_AWAY = (0.0, 90.0)              # degrees of azimuth removed from the outer detector, facing the camera
+WHOLE_VIEW = [(15.5, 9.5, 12.5), (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)]
+TRACKER_VIEW = [(4.2, 2.6, 3.4), (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)]
+
+
+def sector_mesh(pv, r_in, r_out, z0, z1, polygon=False):
+    """A ring (r_in..r_out, z0..z1) with the CUT_AWAY wedge removed, as a closed surface.
+    ``polygon``: twelve flat sides like the CMS barrel wheels, otherwise round."""
+    start = CUT_AWAY[1]
+    span = 360.0 - (CUT_AWAY[1] - CUT_AWAY[0])
+    if polygon:
+        phi = np.radians(np.arange(start, start + span + 1e-6, 30.0))
+        scale = 1.0 / np.cos(np.pi / 12)              # flats (not corners) at the given radii
+    else:
+        phi = np.radians(np.linspace(start, start + span, 55))
+        scale = 1.0
+    R = np.array([r_in, r_out]) * scale
+    Z = np.array([z0, z1])
+    rr, pp, zz = np.meshgrid(R, phi, Z, indexing="ij")
+    grid = pv.StructuredGrid(rr * np.cos(pp), rr * np.sin(pp), zz)
+    return grid.extract_surface(algorithm="dataset_surface")
 RECO_COLOR = theme.THEMES["light"]["reco"]
 TRUE_COLOR = theme.THEMES["light"]["true"]
 DEFAULT_OFF = {"missed hits": False}
@@ -52,7 +87,7 @@ class SceneBuilder:
     def __init__(self, plotter, pv, palette=None):
         self.pl, self.pv = plotter, pv
         self.t = palette or theme.current()
-        groups = DETECTOR_GROUPS + EVENT_GROUPS + (FLIGHT,)
+        groups = DETECTOR_GROUPS + OUTER_GROUPS + EVENT_GROUPS + (FLIGHT,)
         self.actors = {g: [] for g in groups}
         self.visible = {g: DEFAULT_OFF.get(g, True) for g in groups}
         self.geometry_key = None
@@ -70,6 +105,8 @@ class SceneBuilder:
 
     # ---- theme ----------------------------------------------------------------
     def _apply_background(self):
+        # (no depth peeling: it crashes the on-screen Qt view with the reference laptop's Intel
+        # driver; faint faces with outlines read well without it)
         self.pl.set_background(self.t["bg"])
         try:
             self.pl.hide_axes()
@@ -93,7 +130,7 @@ class SceneBuilder:
     def set_geometry(self, geom: DetectorGeometry):
         if geom.key == self.geometry_key:
             return
-        for g in DETECTOR_GROUPS:
+        for g in DETECTOR_GROUPS + OUTER_GROUPS:
             self._clear(g)
         pv = self.pv
         by_group = {}
@@ -113,8 +150,43 @@ class SceneBuilder:
             self._add(group, merged, smooth_shading=False, show_edges=False, **st)
         (a, b) = geom.beam_axis
         self._add("beam axis", pv.Line(a, b), color=self.t["fg"], line_width=1.5)
+        if geom.outer is not None:
+            self._add_outer(geom.outer, dark)
         self.geometry_key = geom.key
         self.geometry = geom
+
+    def _add_outer(self, od, dark):
+        """Calorimeters, coil, return yoke and muon stations, cut away towards the camera."""
+        pv = self.pv
+        meshes = {}
+        for layer in od.layers:
+            style = "ECAL" if layer.name.startswith("ECAL") else "HCAL" if layer.name.startswith("HCAL") else \
+                "solenoid" if layer.group == "solenoid" else "yoke"
+            polygon = layer.group == "return yoke"
+            if layer.kind == "barrel":
+                parts = [sector_mesh(pv, layer.r_in, layer.r_out, -layer.z_out, layer.z_out, polygon)]
+            else:
+                parts = [sector_mesh(pv, layer.r_in, layer.r_out, s * layer.z_in, s * layer.z_out, polygon) for s in (1, -1)]
+            meshes.setdefault((layer.group, style), []).extend(parts)
+        half = 0.04
+        for st in od.stations:
+            if st.kind == "barrel":
+                parts = [sector_mesh(pv, st.pos - half, st.pos + half, -st.hi, st.hi, True)]
+            else:
+                parts = [sector_mesh(pv, st.lo, st.hi, s * (st.pos - half), s * (st.pos + half), True) for s in (1, -1)]
+            meshes.setdefault(("muon chambers", "chambers"), []).extend(parts)
+        for (group, style), parts in meshes.items():
+            merged = parts[0].merge(parts[1:]) if len(parts) > 1 else parts[0]
+            st = dict(OUTER_STYLE[style])
+            edge = st.pop("edge")
+            if dark:
+                st["opacity"] = min(1.0, st["opacity"] * 1.4)
+                if style == "chambers":
+                    st["color"] = "#cfd8dc"
+            self._add(group, merged, smooth_shading=False, show_edges=False, lighting=False, **st)
+            outline = merged.extract_feature_edges(feature_angle=20, boundary_edges=True, manifold_edges=False,
+                                                   non_manifold_edges=False)
+            self._add(group, outline, color=st["color"], opacity=edge, line_width=1.2)
 
     # ---- event ---------------------------------------------------------------
     def set_event(self, ev: DisplayEvent, residual_scale: float | None = None):
@@ -153,8 +225,25 @@ class SceneBuilder:
             path, times = t.flight_path
             a = self._add(FLIGHT, pv.lines_from_points(path), color=reco_c, line_width=4)
             self._anim.append((a, "line", path, times))
-            head = self._add(FLIGHT, pv.Sphere(radius=0.04, center=(0, 0, 0)), color=reco_c)
-            self._heads.append((head, path, times))
+            head_path, head_t = path, times
+            if t.outer is not None and len(t.outer.path) > 1:
+                op = t.outer
+                a = self._add("muons outside the tracker", pv.lines_from_points(op.path), color=reco_c, line_width=6,
+                              render_lines_as_tubes=True)
+                self._anim.append((a, "grow", op.path, op.t))
+                if op.stations:
+                    a = self._add("muon chamber hits", pv.PolyData(op.station_points), color=th["flash"],
+                                  point_size=16, render_points_as_spheres=True)
+                    self._anim.append((a, "points", op.station_points, op.station_t))
+                if op.stopped_in:
+                    a = self._add("muons outside the tracker", pv.PolyData(op.path[-1:]), color=th["bad"],
+                                  point_size=18, render_points_as_spheres=False)
+                    self._anim.append((a, "points", op.path[-1:], op.t[-1:]))
+                head_path, head_t = np.vstack([path, op.path[1:]]), np.concatenate([times, op.t[1:]])
+            # the ball grows with the scene, so it stays visible in the whole-detector view
+            radius = 0.04 if t.outer is None else 0.09
+            head = self._add(FLIGHT, pv.Sphere(radius=radius, center=(0, 0, 0)), color=reco_c)
+            self._heads.append((head, head_path, head_t))
         self._add("vertex", pv.Sphere(radius=0.012, center=ev.vertex), color=th["vertex"])
         if self._text is not None:
             self.pl.remove_actor(self._text)
@@ -181,6 +270,10 @@ class SceneBuilder:
             else:
                 lines.append(f"{lab}: pT reco {t.pt_reco:.2f} / true {t.pt_true:.2f} GeV, eta {t.eta_reco:+.2f}, "
                              f"{t.n_hits} hits")
+            if t.outer is not None:
+                lines.append(f"     outside the tracker: {t.outer.summary()}")
+        if ev.has_outer:
+            lines.append("outer detector: schematic (field reversed in the iron, average energy loss)")
         if self.residual_scale > 1 and not ev.is_data:
             lines.append(f"hit residuals magnified x{self.residual_scale:g} (display only)")
         return "\n".join(lines)
@@ -198,11 +291,17 @@ class SceneBuilder:
     def _apply_progress(self):
         final = self.progress >= 1.0
         t_cut = self.progress * (self.span or self.event.t_max)
+        # tracks are fitted once both muons have left the tracker (with the outer detector the
+        # muons are still flying outwards then); without it, at the end as before
+        fitted = bool(final or (self.event.has_outer and t_cut >= self.event.t_tracker))
         off = set()
         for a, kind, pts, times in self._anim:
             ds = a.GetMapper().GetInput()
-            if kind == "line":
-                part = None if final else path_until(pts, times, t_cut)
+            if kind in ("line", "grow"):
+                if kind == "line":           # the path flown inside the tracker, until the tracks are fitted
+                    part = None if fitted else path_until(pts, times, t_cut)
+                else:                        # the path outside the tracker: grows, then stays
+                    part = pts if final else path_until(pts, times, t_cut)
                 if part is None or len(part) < 2:
                     off.add(id(a)); continue
                 ds.ShallowCopy(self.pv.lines_from_points(part))
@@ -220,7 +319,7 @@ class SceneBuilder:
             if final:
                 off.add(id(head)); continue
             head.SetPosition(*path_until(path, times, t_cut)[-1])
-        if not final:
+        if not fitted:
             for g in FINAL_ONLY:
                 off.update(id(a) for a in self.actors[g])
         self._phase_off = off
@@ -236,14 +335,21 @@ class SceneBuilder:
         self.pl.render()
 
     def camera(self, view: str):
+        """'iso' (the tracker), 'whole' (the whole detector), 'beam' (along z) or 'side'."""
         if view == "beam":
             self.pl.view_xy()
+            self.pl.reset_camera()
         elif view == "side":
             self.pl.view_zy()
+            self.pl.reset_camera()
+        elif view == "whole":
+            # oblique view of the cut-away detector, beam horizontal, as in the CMS drawings
+            self.pl.camera_position = WHOLE_VIEW
+            self.pl.reset_camera()
         else:
-            # oblique view with the beam horizontal, as in collider event displays
-            self.pl.camera_position = [(4.2, 2.6, 3.4), (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)]
-        self.pl.reset_camera()
+            # oblique view of the tracker, close enough to see the hits
+            self.pl.camera_position = TRACKER_VIEW
+            self.pl.reset_camera(bounds=(-1.3, 1.3, -1.3, 1.3, -3.0, 3.0))
         self.pl.render()
 
     def screenshot(self, path):
@@ -305,12 +411,29 @@ class Event3DTab(QtWidgets.QWidget):
         self.bar = AnimationBar(self.clock)
         self.view_box = QtWidgets.QVBoxLayout()
         self.view_box.addWidget(self.status, 1)
-        self.view_box.addWidget(self.bar)
+        self.controls_btn = QtWidgets.QToolButton(); self.controls_btn.setText("Controls")
+        self.controls_btn.setCheckable(True); self.controls_btn.setChecked(True)
+        self.controls_btn.setToolTip("Show or hide the camera, visibility and residual controls")
+        row = QtWidgets.QHBoxLayout(); row.addWidget(self.bar, 1); row.addWidget(self.controls_btn)
+        self.view_box.addLayout(row)
         self.controls = self._build_controls()
         self.controls.setEnabled(False)
+        # the control column scrolls vertically, so the tab fits short screens
+        self.controls_area = QtWidgets.QScrollArea()
+        self.controls_area.setWidget(self.controls)
+        self.controls_area.setWidgetResizable(True)
+        self.controls_area.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.controls_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self._fit_controls_width()
+        from .layout import splitter, wrap
+        # the view takes the spare width; the control column keeps its size and can be dragged closed
+        self.split = splitter("event3d", [wrap(self.view_box, margins=False), self.controls_area], [1, 0],
+                              collapsible=(1,))
         lay = QtWidgets.QHBoxLayout(self)
-        lay.addLayout(self.view_box, 4)
-        lay.addWidget(self.controls, 1)
+        lay.addWidget(self.split)
+        self._auto_folded = False
+        self.controls_btn.toggled.connect(self._show_controls)
+        self.split.splitterMoved.connect(lambda *_: self._sync_controls_btn())
         self.clock.frame.connect(self._frame)
 
     # ---- UI --------------------------------------------------------------------
@@ -327,14 +450,19 @@ class Event3DTab(QtWidgets.QWidget):
         v.addLayout(row)
         cam = QtWidgets.QGroupBox("Camera")
         cl = QtWidgets.QGridLayout(cam)
-        for i, (text, view) in enumerate([("3D (reset)", "iso"), ("Along beam (x–y)", "beam"), ("Side (z–y)", "side")]):
+        self.camera_buttons = {}
+        for i, (text, view) in enumerate([("Tracker", "iso"), ("Whole detector", "whole"),
+                                          ("Along beam (x–y)", "beam"), ("Side (z–y)", "side")]):
             b = QtWidgets.QPushButton(text)
             b.clicked.connect(lambda _=False, vw=view: self.builder and self.builder.camera(vw))
-            cl.addWidget(b, i, 0)
-        cl.addWidget(QtWidgets.QLabel("mouse: left-drag rotate · wheel zoom · shift-drag pan"), 3, 0)
+            cl.addWidget(b, i // 2, i % 2)
+            self.camera_buttons[view] = b
+        hint = QtWidgets.QLabel("mouse: left-drag rotate · wheel zoom · shift-drag pan")
+        hint.setWordWrap(True)
+        cl.addWidget(hint, 2, 0, 1, 2)
         v.addWidget(cam)
         self.checks = {}
-        for title, groups in (("Detector", DETECTOR_GROUPS), ("Event", EVENT_GROUPS)):
+        for title, groups in (("Detector", DETECTOR_GROUPS + OUTER_GROUPS), ("Event", EVENT_GROUPS)):
             g = QtWidgets.QGroupBox(title)
             gl = QtWidgets.QVBoxLayout(g)
             for name in groups:
@@ -361,15 +489,62 @@ class Event3DTab(QtWidgets.QWidget):
             "dark spheres: recorded hits · grey squares: lost hits<br>purple spheres (CMS data): computed layer "
             "crossings, not hits<br>green sphere: vertex · arrows: momentum (length ∝ log p)<br>"
             "line along z: beam axis<br><b>Animation:</b> bright line and ball: the muon in flight at its real "
-            "speed; the fitted track appears when both muons have left the tracker.")
+            "speed; the fitted track appears when both muons have left the tracker.<br>"
+            "<b>Outer detector</b> (View menu; schematic): green ECAL, amber HCAL, grey coil, red iron return "
+            "yoke, grey muon stations (MB1–4 barrel, ME1–4 endcap). Outside the coil the field points the other way, "
+            "so muons bend back; orange balls: muon-chamber hits; red square: where a muon ran out of energy. "
+            "Only muons get this far, and soft ones (below about 3 GeV) stop in the calorimeters or the iron.")
         legend.setWordWrap(True)
         v.addWidget(legend)
         v.addStretch()
         return box
 
+    def minimumSizeHint(self):
+        """The 3D view alone: in a narrow window the control column folds away (see resizeEvent)."""
+        view = self.split.widget(0).minimumSizeHint()
+        m = self.layout().contentsMargins()
+        return QtCore.QSize(view.width() + m.left() + m.right(), view.height() + m.top() + m.bottom())
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        need = self.split.widget(0).minimumSizeHint().width() + self.controls_area.minimumWidth() + self.split.handleWidth()
+        have = self.split.width()
+        sizes = self.split.sizes()
+        if have < need and sizes[1] > 0:
+            self._auto_folded = True
+            self.split.setSizes([have, 0])
+        elif have >= need and self._auto_folded:
+            self._auto_folded = False
+            self.split.setSizes([have - self.controls_area.minimumWidth() - self.split.handleWidth(),
+                                 self.controls_area.minimumWidth()])
+        self._sync_controls_btn()
+
+    def _show_controls(self, on):
+        have = self.split.width()
+        if on and self.split.sizes()[1] == 0:
+            cw = self.controls_area.minimumWidth()
+            self.split.setSizes([max(have - cw - self.split.handleWidth(), 0), cw])
+        elif not on and self.split.sizes()[1] > 0:
+            self.split.setSizes([have, 0])
+        self._auto_folded = False
+
+    def _sync_controls_btn(self):
+        shown = self.split.sizes()[1] > 0
+        if self.controls_btn.isChecked() != shown:
+            self.controls_btn.blockSignals(True); self.controls_btn.setChecked(shown); self.controls_btn.blockSignals(False)
+
+    def _fit_controls_width(self):
+        """Width of the control column: its content plus a vertical scroll bar (no horizontal scrolling)."""
+        self.controls.ensurePolished()
+        self.controls.adjustSize()
+        w = max(self.controls.sizeHint().width(), self.controls.minimumSizeHint().width())
+        # never narrower than the controls (nothing is cut off); the user may widen it
+        self.controls_area.setMinimumWidth(w + self.controls_area.verticalScrollBar().sizeHint().width() + 6)
+
     # ---- lazy loading ------------------------------------------------------------
     def showEvent(self, e):
         super().showEvent(e)
+        self._fit_controls_width()
         self.start_loading()
         if self.builder is not None and self.builder.progress != self.clock.fraction:
             self.builder.set_progress(self.clock.fraction)
@@ -407,7 +582,8 @@ class Event3DTab(QtWidgets.QWidget):
         ev = self.pending or getattr(self.main, "current_event", None)
         if ev is not None:
             self._draw(ev)
-            self.builder.camera("iso")
+            geom = self.builder.geometry
+            self.builder.camera("whole" if geom is not None and geom.outer is not None else "iso")
         self.ready.emit()
 
     # ---- updates -----------------------------------------------------------------
@@ -421,11 +597,19 @@ class Event3DTab(QtWidgets.QWidget):
 
     def _draw(self, ev):
         geom = getattr(self.main, "geometry", None)
+        had_outer = self.builder.geometry is not None and self.builder.geometry.outer is not None
         if geom is not None:
             self.builder.set_geometry(geom)
         self.builder.progress = self.clock.fraction
         self.builder.span = self.clock.t_max or None
         self.builder.set_event(ev, self.residual.currentData())
+        has_outer = geom is not None and geom.outer is not None
+        for g in OUTER_GROUPS + ("muons outside the tracker", "muon chamber hits"):
+            if g in self.checks:
+                self.checks[g].setEnabled(has_outer)
+        self.camera_buttons["whole"].setEnabled(has_outer)
+        if has_outer != had_outer:
+            self.builder.camera("whole" if has_outer else "iso")
 
     def _frame(self, f):
         if self.builder is not None and self.isVisible():

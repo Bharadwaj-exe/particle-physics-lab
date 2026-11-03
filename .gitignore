@@ -6,3 +6,4 @@ __pycache__/
 data/raw/*.csv
 outputs_quick/
 audit/results/sim_cache.npz
+rust/target/

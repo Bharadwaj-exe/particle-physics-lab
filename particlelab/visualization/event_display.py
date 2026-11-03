@@ -8,6 +8,10 @@ Every point on a path and every hit also carries its flight time in ns,
 t = (path length) / (beta c), so the views can animate an event on one physical
 clock. Events come from the simulation (``make_event``) or from the CMS 2011
 open data (``data_event``), where only the measured momenta are known.
+
+With ``outer=True`` each muon is also followed through a schematic outer detector
+(calorimeters, solenoid, return yoke, muon stations; ``outer_detector``). That part is
+for the displays only and does not touch the tracker results.
 """
 from __future__ import annotations
 
@@ -20,6 +24,7 @@ from ..detector.simulation import helix_at
 from ..physics import generate, inv_mass, pt_eta_phi
 from ..physics.kinematics import M_MU
 from ..units import C_TRACK, cm
+from .outer_detector import OuterDetector, OuterTrack, cms_outer, continue_track
 
 BEAM_PIPE_RADIUS = 3.0 * cm      # drawn for orientation only; not simulated as material
 BEAM_AXIS_HALF_LENGTH = 3.2
@@ -54,6 +59,7 @@ class DetectorGeometry:
     disks: tuple
     beam_axis: tuple      # ((0,0,-L), (0,0,+L))
     key: tuple            # identifies the geometry, for caching
+    outer: OuterDetector | None = None   # schematic calorimeters, solenoid and muon system (display only)
 
     def groups(self):
         return sorted({s.group for s in self.cylinders + self.disks})
@@ -64,10 +70,11 @@ def _disk_group(name: str) -> str:
         "".join(c for c in name if c.isalpha()), "endcap disks")
 
 
-def detector_geometry(det: DetectorConfig, max_half_length: float = 3.0) -> DetectorGeometry:
+def detector_geometry(det: DetectorConfig, max_half_length: float = 3.0, outer: bool = False) -> DetectorGeometry:
     """Shapes taken directly from the detector configuration used by the simulation.
 
-    Infinitely long reference layers are drawn with ``max_half_length``.
+    Infinitely long reference layers are drawn with ``max_half_length``. ``outer`` adds the
+    schematic outer detector around the tracker.
     """
     cyl = [CylinderShape("beam pipe", "beam pipe", BEAM_PIPE_RADIUS, max_half_length)]
     for b in det.barrels:
@@ -79,7 +86,10 @@ def detector_geometry(det: DetectorConfig, max_half_length: float = 3.0) -> Dete
             disks.append(DiskShape(f"{d.name}{'+' if sgn > 0 else '-'}", _disk_group(d.name), sgn * d.z, d.r_min, d.r_max))
     key = (tuple((c.radius, c.half_length) for c in cyl), tuple((d.z, d.r_min, d.r_max) for d in disks))
     axis = ((0.0, 0.0, -BEAM_AXIS_HALF_LENGTH), (0.0, 0.0, BEAM_AXIS_HALF_LENGTH))
-    return DetectorGeometry(tuple(cyl), tuple(disks), axis, key)
+    od = cms_outer() if outer else None
+    if od is not None:
+        axis = ((0.0, 0.0, -10.8), (0.0, 0.0, 10.8))
+    return DetectorGeometry(tuple(cyl), tuple(disks), axis, key + (outer,), od)
 
 
 # ---- event -------------------------------------------------------------------------
@@ -105,6 +115,7 @@ class DisplayTrack:
     missed_t: np.ndarray = None
     crossings: np.ndarray = field(default_factory=lambda: np.empty((0, 3)))   # data events: computed layer crossings
     crossing_t: np.ndarray = field(default_factory=lambda: np.empty(0))
+    outer: OuterTrack | None = None    # the muon beyond the tracker (display only)
 
     @property
     def has_truth(self): return len(self.true_path) > 0
@@ -146,9 +157,18 @@ class DisplayEvent:
     def is_data(self): return self.source != "simulation"
 
     @property
-    def t_max(self):
-        """Time in ns when the last muon leaves the drawn volume."""
+    def t_tracker(self):
+        """Time in ns when the last muon leaves the tracker: the tracks can then be fitted."""
         return max(float(t.flight_path[1][-1]) for t in self.tracks)
+
+    @property
+    def t_max(self):
+        """Time in ns when the last muon leaves the drawn volume (or stops)."""
+        return max(float(t.outer.t[-1]) if t.outer is not None else float(t.flight_path[1][-1]) for t in self.tracks)
+
+    @property
+    def has_outer(self):
+        return any(t.outer is not None for t in self.tracks)
 
 
 def helix_path(p, q, B, z0, s_max, n=240):
@@ -194,8 +214,22 @@ def _passes(p, det):
     return bool(pt[0] > det.pt_min and abs(eta[0]) < det.eta_max)
 
 
+def add_outer(ev: DisplayEvent, outer: OuterDetector | None = None) -> DisplayEvent:
+    """Follow each muon beyond the tracker through the schematic outer detector (display only).
+
+    Simulated events start from the true path and true momentum; data events from the
+    measured helix and momentum."""
+    outer = outer or cms_outer()
+    for t in ev.tracks:
+        path, times = t.flight_path
+        p = t.p_true if t.has_truth else t.p_reco
+        q = t.charge_true if t.has_truth else t.charge_reco
+        t.outer = continue_track(path, times, float(np.linalg.norm(p)), int(q), ev.B, outer)
+    return ev
+
+
 def make_event(name: str, det: DetectorConfig, rng: np.random.Generator, require_cuts: bool = True,
-               max_tries: int = 2000) -> DisplayEvent:
+               max_tries: int = 2000, outer: bool = False) -> DisplayEvent:
     """Generate one decay and run it through the detector with the existing code.
 
     With ``require_cuts`` the event is redrawn until both muons are reconstructed with
@@ -243,7 +277,8 @@ def make_event(name: str, det: DetectorConfig, rng: np.random.Generator, require
             hit_t=flight_time(h.s[0][rec], p),
             missed_t=flight_time(h.s[0][crossed & ~rec], p)))
     reco_m = float(inv_mass(tracks[0].p_reco[None], tracks[1].p_reco[None])[0])
-    return DisplayEvent(name, det.name, det.B, np.array([0.0, 0.0, z0]), float(ev.mass[0]), reco_m, tracks, passes)
+    out = DisplayEvent(name, det.name, det.B, np.array([0.0, 0.0, z0]), float(ev.mass[0]), reco_m, tracks, passes)
+    return add_outer(out) if outer else out
 
 
 # ---- CMS open-data events -------------------------------------------------------------
@@ -273,7 +308,7 @@ def exit_arc_length(p, B, r_out, z_out, z0=0.0):
     return float(min(s_r, s_z))
 
 
-def data_event(row, process: str, det: DetectorConfig) -> DisplayEvent:
+def data_event(row, process: str, det: DetectorConfig, outer: bool = False) -> DisplayEvent:
     """Display event from one row of the CMS dimuon CSV (columns px1 … Q2, Run, Event, type1, type2).
 
     Only the measured momenta and charges are known: the vertex is drawn at the origin
@@ -298,9 +333,10 @@ def data_event(row, process: str, det: DetectorConfig) -> DisplayEvent:
             crossings=pts, crossing_t=flight_time(s_hit, p)))
     tracks.sort(key=lambda t: t.charge_reco)          # μ⁻ first, as in simulated events
     m = float(inv_mass(tracks[0].p_reco[None], tracks[1].p_reco[None])[0])
-    return DisplayEvent(process, "CMS (2011 data)", det.B, np.zeros(3), float("nan"), m, tracks, True,
-                        source="CMS 2011 data", run=int(row["Run"]), event_number=int(row["Event"]),
-                        muon_types=tuple(str(row[f"type{i}"]) for i in (1, 2)))
+    out = DisplayEvent(process, "CMS (2011 data)", det.B, np.zeros(3), float("nan"), m, tracks, True,
+                       source="CMS 2011 data", run=int(row["Run"]), event_number=int(row["Event"]),
+                       muon_types=tuple(str(row[f"type{i}"]) for i in (1, 2)))
+    return add_outer(out) if outer else out
 
 
 def pick_data_row(events, process: str, rng: np.random.Generator):
